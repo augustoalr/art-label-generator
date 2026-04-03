@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Rótulos para Obras de Arte</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <header>
+        <h1><i class="fas fa-palette"></i>Art Label Generator V6.1</h1>
+        <div class="header-actions">
+            <input type="file" id="import-project-input" style="display: none;" accept=".artlabel">
+            <button id="import-project-btn" class="action-btn" title="Cargar Proyecto"><i class="fas fa-folder-open"></i> Import Project</button>
+            <button id="export-project-btn" class="action-btn" title="Guardar Proyecto"><i class="fas fa-download"></i> Export Project</button>
+            <button id="generate-pdf-btn" class="action-btn"><i class="fas fa-file-pdf"></i>Generate PDF of all labels</button>
+            <button id="clear-all-btn" class="action-btn danger-btn"><i class="fas fa-trash-alt"></i> CLEAN ALL</button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- New Hidden Toggle for Guides (CSS controlled) -->
+        <input type="checkbox" id="show-guides-toggle" style="display: none;">
+        <div class="editor-column">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-edit"></i>Creation panel</h2>
+                <form id="label-form">
+                       <div class="form-group"><label for="asset-number">Id number</label>
+                        <div class="input-with-icon"><input type="text" id="asset-number" placeholder="Ej: 779"
+                                required><button type="button" id="search-asset-btn" class="search-btn"
+                                title="Buscar por Nro. de Bien"><i class="fas fa-search"></i></button></div>
+                    </div>
+                    <input type="hidden" id="label-id">
+                    <div class="form-group"><label for="author">Author</label><input type="text" id="author"
+                            placeholder="Ej: Leonardo da Vinci" required></div>
+                    <div class="form-group"><label for="title">Title</label><input type="text" id="title"
+                            placeholder="Ej: La Gioconda (Mona Lisa)" required></div>
+                    <div class="form-group"><label for="date">Date</label><input type="text" id="date"
+                            placeholder="Ej: c. 1503-1519" required></div>
+                    <div class="form-group"><label for="technique">Technique</label><input type="text" id="technique"
+                            placeholder="Ej: Pintura al óleo sobre tabla de álamo" required></div>
+                    <div class="form-group"><label for="measurements">Measurements</label><input type="text"
+                            id="measurements" placeholder="Ej: 77 cm × 53 cm" required></div>
+                 
+                    <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Save </button>
+                    <button type="button" id="cancel-edit-btn" class="cancel-btn" style="display: none;"><i
+                            class="fas fa-times"></i> Cancel edit</button>
+                </form>
+            </div>
+
+            
+        </div>
+
+        <div class="organization-column">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-palette"></i> Design and Preview </h2>
+                <div class="form-group">
+                    <div id="live-preview-container">
+                        <div class="preview-grid-overlay"></div>
+                        <div id="live-preview" class="label-preview"></div>
+                    </div>
+                    <div class="preview-options">
+                        <label class="checkbox-label" for="show-guides-toggle">
+                            <i class="fas fa-border-all"></i> T-Marks
+                        </label>
+                        <div class="label-dim-inputs">
+                            <span title="Ancho del rótulo en cm">W: <input type="number" id="label-width-input" class="pos-input" value="8" step="0.1" min="1"> cm</span>
+                            <span title="Alto del rótulo en cm">H: <input type="number" id="label-height-input" class="pos-input" value="6" step="0.1" min="1"> cm</span>
+                        </div>
+                    </div>
+                    <label>Type of Decoration</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="decoration-type" value="arabesque"
+                                checked><span>Arabescos / Arabesques</span></label>
+                        <label class="radio-label"><input type="radio" name="decoration-type" value="neutral"><span>Institutional logo</span></label>
+                    </div>
+                </div>
+                <div id="arabesque-controls" class="decoration-manager">
+                    <div class="deco-upload"><label for="deco-top-input">Arabesco Superior</label>
+                        <div class="input-group"><input type="file" id="deco-top-input" class="deco-input"
+                                accept="image/*"><button class="delete-deco-btn" data-deco="top"><i
+                                    class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div class="deco-upload"><label for="deco-bottom-input">Arabesco Inferior</label>
+                        <div class="input-group"><input type="file" id="deco-bottom-input" class="deco-input"
+                                accept="image/*"><button class="delete-deco-btn" data-deco="bottom"><i
+                                    class="fas fa-trash"></i></button></div>
+                    </div>
+                </div>
+                <div id="neutral-logo-controls" class="decoration-manager" style="display: none;">
+                    <div class="deco-upload"><label for="deco-neutral-input">Archivo de Logo</label>
+                        <div class="input-group"><input type="file" id="deco-neutral-input" class="deco-input"
+                                accept="image/*"><button class="delete-deco-btn" data-deco="neutral"><i
+                                    class="fas fa-trash"></i></button></div>
+                    </div>
+                    <div id="logo-position-controls" style="display: none;">
+                        <p class="helper-text">Drag the logo in the preview to move it. Use the corner handle to resize.</p>
+                        <div class="position-info">
+                            <span>X: <input type="number" id="logo-pos-x" class="pos-input"> px</span>
+                            <span>Y: <input type="number" id="logo-pos-y" class="pos-input"> px</span>
+                            <span>W: <input type="number" id="logo-size-w" class="pos-input" min="5"> px</span>
+                            <span>H: <input type="number" id="logo-size-h" class="pos-input" min="5" disabled title="Auto-calculated proportionally"> px</span>
+                            <button type="button" id="reset-logo-pos-btn" class="icon-btn" title="Resetear Posición"><i
+                                    class="fas fa-undo"></i></button>
+                        </div>
+                        <div class="rotation-deg-container">
+                            <span>Rotation: <input type="number" id="logo-rotation-deg" class="pos-input" value="0">º</span>
+                            <i class="fas fa-sync-alt" style="font-size: 0.8rem; opacity: 0.5;"></i>
+                        </div>
+                        <div class="layer-controls">
+                            <button type="button" id="layer-back-btn" class="layer-btn"><i class="fas fa-level-down-alt"></i> Send to Back</button>
+                            <button type="button" id="layer-front-btn" class="layer-btn active"><i class="fas fa-level-up-alt"></i> Bring to Front</button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-grip-horizontal"></i> Unassigned Labels </h2>
+                <p class="helper-text">Drag a label to a room or use the button.<i class="fas fa-folder-plus"
+                        style="color:#0984e3"></i>.</p>
+                <div id="miniatures-area" class="drop-zone"></div>
+            </div>
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-door-open"></i> Rooms </h2>
+                <div id="rooms-manager">
+                    <form id="add-room-form"><input type="text" id="room-name-input"
+                            placeholder="Nombre del nuevo cuarto" required><button type="submit"><i
+                                class="fas fa-plus"></i> Create room </button></form>
+                    <div id="rooms-container"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="room-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-room-name"></h2><button class="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-room-labels"></div>
+            <div class="modal-footer"><button id="generate-room-pdf-btn" class="action-btn"><i
+                        class="fas fa-file-pdf"></i> Generar PDF del Cuarto</button></div>
+        </div>
+    </div>
+    <div id="confirm-modal" class="confirm-modal-overlay">
+        <div class="confirm-modal-box">
+            <h2 class="confirm-modal-title"><i class="fas fa-exclamation-triangle"></i> Se requiere confirmación</h2>
+            <p id="confirm-modal-text" class="confirm-modal-text"></p>
+            <div class="confirm-modal-actions"><button id="confirm-modal-cancel-btn"
+                    class="modal-btn cancel">Cancelar</button><button id="confirm-modal-confirm-btn"
+                    class="modal-btn confirm danger">Sí, Eliminar</button></div>
+        </div>
+    </div>
+    <div id="move-to-room-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="move-modal-title">Mover Rótulo a...</h2><button class="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><input type="text" id="move-modal-filter" class="form-control"
+                        placeholder="Buscar cuarto por nombre..."></div>
+                <ul id="move-modal-room-list" class="room-select-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="pin-modal-overlay" class="pin-modal-overlay">
+        <div class="pin-modal-box">
+            <h2 class="pin-modal-title"><i class="fas fa-lock"></i> Acceso Protegido</h2>
+            <p class="pin-modal-text">Por favor, introduce el PIN para continuar.</p>
+            <form id="pin-form">
+                <input type="password" id="pin-input" class="pin-input" placeholder="PIN" required>
+                <button type="submit" class="pin-submit-btn">Entrar</button>
+            </form>
+            <p id="pin-error-message" class="pin-error"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
