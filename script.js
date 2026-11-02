@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DE RENDERIZADO ---
     const renderUI = () => {
         updateDecoControlsVisibility();
+        syncStyleControlsUI();
         renderLivePreview();
         renderMiniatures();
         renderRooms();
@@ -287,8 +288,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Always add Registration Marks (T-Marks) for Pre-vis
         renderRegistrationMarks(livePreview);
         
-        // Add the text content safely — asset number is OUTSIDE the container for accurate positioning
-        const textContentHTML = `<div class="label-content-container"><div class="label-text-block"><p class="label-author">${data.author||''}</p><p class="label-title">${data.title||''}</p><p class="label-date">${data.date||''}</p><p class="label-technique">${data.technique||''}</p><p class="label-measurements">${data.measurements||''}</p></div></div><p class="label-asset-number">${data.assetNumber||''}</p>`;
+        // Add the text content safely with dynamic styleConfig (Gallery Style Pro Mode)
+        const styleCfg = state.styleConfig || DEFAULT_STYLE_CONFIG;
+        const textAlign = styleCfg.textAlign || 'center';
+        const lineSpacing = styleCfg.lineSpacingMultiplier !== undefined ? styleCfg.lineSpacingMultiplier : 1.0;
+        const fieldsCfg = (styleCfg.fields || DEFAULT_STYLE_CONFIG.fields).reduce((acc, f) => {
+            acc[f.id] = f;
+            return acc;
+        }, {});
+
+        const getFieldStyle = (fieldId) => {
+            const f = fieldsCfg[fieldId] || {};
+            const weight = f.bold ? 'bold' : 'normal';
+            const style = f.italic ? 'italic' : 'normal';
+            const display = f.visible !== false ? 'block' : 'none';
+            return `font-weight: ${weight}; font-style: ${style}; display: ${display};`;
+        };
+
+        const textContentHTML = `<div class="label-content-container" style="text-align: ${textAlign};"><div class="label-text-block" style="line-height: ${lineSpacing};"><p class="label-author" style="${getFieldStyle('author')}">${data.author||''}</p><p class="label-title" style="${getFieldStyle('title')}">${data.title||''}</p><p class="label-date" style="${getFieldStyle('date')}">${data.date||''}</p><p class="label-technique" style="${getFieldStyle('technique')}">${data.technique||''}</p><p class="label-measurements" style="${getFieldStyle('measurements')}">${data.measurements||''}</p></div></div><p class="label-asset-number">${data.assetNumber||''}</p>`;
         livePreview.insertAdjacentHTML('beforeend', textContentHTML);
 
         if (stagedDecorationType === 'neutral' && stagedNeutralLogo) {
@@ -1336,6 +1353,138 @@ document.addEventListener('DOMContentLoaded', () => {
 };
 
     generatePdfBtn.addEventListener('click', async () => await generatePDF(state.labels));
+
+
+    // --- GESTIÓN DE CONFIGURACIÓN DE ESTILO (MODO PRO / STYLE ENGINE) ---
+    const styleAccordionBtn = document.getElementById('style-accordion-btn');
+    const styleAccordion = document.querySelector('.style-accordion');
+    const styleAlignButtons = document.querySelectorAll('.style-align-btn');
+    const lineSpacingSlider = document.getElementById('line-spacing-slider');
+    const lineSpacingValue = document.getElementById('line-spacing-value');
+    const resetStyleBtn = document.getElementById('reset-style-btn');
+
+    if (styleAccordionBtn && styleAccordion) {
+        styleAccordionBtn.addEventListener('click', () => {
+            styleAccordion.classList.toggle('open');
+        });
+    }
+
+    const syncStyleControlsUI = () => {
+        const cfg = state.styleConfig || DEFAULT_STYLE_CONFIG;
+
+        // 1. Sincronizar alineación
+        const currentAlign = cfg.textAlign || 'center';
+        styleAlignButtons.forEach(btn => {
+            if (btn.dataset.align === currentAlign) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // 2. Sincronizar botones de formato de cada campo
+        const fieldsMap = (cfg.fields || DEFAULT_STYLE_CONFIG.fields).reduce((acc, f) => {
+            acc[f.id] = f;
+            return acc;
+        }, {});
+
+        document.querySelectorAll('.style-field-row').forEach(row => {
+            const fieldId = row.dataset.field;
+            const fieldData = fieldsMap[fieldId] || { bold: false, italic: false };
+
+            const boldBtn = row.querySelector('.format-bold');
+            if (boldBtn) {
+                if (fieldData.bold) boldBtn.classList.add('active');
+                else boldBtn.classList.remove('active');
+            }
+
+            const italicBtn = row.querySelector('.format-italic');
+            if (italicBtn) {
+                if (fieldData.italic) italicBtn.classList.add('active');
+                else italicBtn.classList.remove('active');
+            }
+        });
+
+        // 3. Sincronizar interlineado
+        const spacing = cfg.lineSpacingMultiplier !== undefined ? cfg.lineSpacingMultiplier : 1.0;
+        if (lineSpacingSlider) lineSpacingSlider.value = spacing;
+        if (lineSpacingValue) lineSpacingValue.textContent = `${parseFloat(spacing).toFixed(1)}x`;
+    };
+
+    // Eventos de alineación
+    styleAlignButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const align = btn.dataset.align;
+            if (!state.styleConfig) {
+                state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+            }
+            state.styleConfig.textAlign = align;
+            syncStyleControlsUI();
+            saveState();
+            renderLivePreview();
+        });
+    });
+
+    // Eventos de formato por campo (Negrita / Cursiva)
+    document.querySelectorAll('.style-field-row').forEach(row => {
+        const fieldId = row.dataset.field;
+        const boldBtn = row.querySelector('.format-bold');
+        const italicBtn = row.querySelector('.format-italic');
+
+        if (boldBtn) {
+            boldBtn.addEventListener('click', () => {
+                if (!state.styleConfig) {
+                    state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+                }
+                const field = state.styleConfig.fields.find(f => f.id === fieldId);
+                if (field) {
+                    field.bold = !field.bold;
+                    syncStyleControlsUI();
+                    saveState();
+                    renderLivePreview();
+                }
+            });
+        }
+
+        if (italicBtn) {
+            italicBtn.addEventListener('click', () => {
+                if (!state.styleConfig) {
+                    state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+                }
+                const field = state.styleConfig.fields.find(f => f.id === fieldId);
+                if (field) {
+                    field.italic = !field.italic;
+                    syncStyleControlsUI();
+                    saveState();
+                    renderLivePreview();
+                }
+            });
+        }
+    });
+
+    // Evento de control de interlineado
+    if (lineSpacingSlider) {
+        lineSpacingSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (!state.styleConfig) {
+                state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+            }
+            state.styleConfig.lineSpacingMultiplier = val;
+            if (lineSpacingValue) lineSpacingValue.textContent = `${val.toFixed(1)}x`;
+            saveState();
+            renderLivePreview();
+        });
+    }
+
+    // Evento de reseteo a valores por defecto
+    if (resetStyleBtn) {
+        resetStyleBtn.addEventListener('click', () => {
+            state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+            syncStyleControlsUI();
+            saveState();
+            renderLivePreview();
+        });
+    }
 
     // --- INICIALIZACIÓN ---
     loadState();
