@@ -97,4 +97,4 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
 - **Archivos que toca**: `README.md`, `HANDOVER_PROMPT.md`
 - **Criterios de Aceptación**:
   - Documentación clara y precisa del flujo de trabajo, compatibilidad y atajos.
-- **Estado**: En progreso (Asignada a subagente)
+- **Estado**: Completada (Merged a main)
