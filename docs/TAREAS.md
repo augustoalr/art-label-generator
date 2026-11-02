@@ -44,12 +44,13 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
 
 ### [TASK-002] Modularizar helpers matemáticos y cálculo de grilla de PDF
 - **ID**: `TASK-002`
-- **Objetivo**: Extraer la lógica pura de cálculo de distribución de etiquetas en hoja Letter/A4 y conversión de CM/PX a un módulo de utilidad comprobable.
-- **Archivos que toca**: `js/grid-calculator.js` (nuevo), referencia en `index.html`, llamada en `script.js`.
+- **Objetivo**: Extraer la lógica pura de cálculo de distribución de etiquetas en hoja Letter/A4 y conversión de CM/PX/MM a un módulo de utilidad comprobable (`js/grid-calculator.js`).
+- **Archivos que toca**: `js/grid-calculator.js` (nuevo), `index.html`, `script.js`
 - **Criterios de Aceptación**:
-  - Funciones puras independientes del DOM para calcular filas, columnas y márgenes.
+  - Funciones puras independientes del DOM (`calculatePageGrid`, `cmToMm`, `cmToPx`).
   - No altera el comportamiento existente de renderizado ni generación de PDF.
-- **Estado**: Pendiente
+  - Verificado con `test-syntax.js` y test unitario en el propio módulo o suite de comprobación.
+- **Estado**: Completada (Merged a main)
 
 ---
 

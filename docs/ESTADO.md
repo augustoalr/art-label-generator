@@ -38,7 +38,8 @@
      - Rotación en grados e inputs numéricos finos.
      - Control de capas (Send to Back / Bring to Front).
      - Magnetic snapping a ejes centrales.
-5. **Generador de PDF Seguro (`jsPDF`)**:
+5. **Generador de PDF Seguro (`jsPDF`) y Módulo de Grilla (`js/grid-calculator.js`)**:
+   - Módulo de utilidades matemáticas desacoplado (`calculatePageGrid`, `cmToMm`, `cmToPx`) con soporte UMD.
    - Cálculo automático de grilla por página según dimensiones del rótulo.
    - Manejo optimizado de imágenes con `createImageBitmap` y escala máxima (800px) para evitar bloqueos del navegador.
    - Exportación de todas las etiquetas o filtradas por sala ("Room").
