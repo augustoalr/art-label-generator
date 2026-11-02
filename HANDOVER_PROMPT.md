@@ -1,33 +1,40 @@
-# Art Label Generator V6.1 - Manual de Traspaso (v7.0)
+# Art Label Generator V7.0 - Manual de Traspaso (Handover Prompt)
 
-## 🛡️ DIRECTIVA CRÍTICA: AISLAR LA ESTABILIDAD
-**La versión 6.1 es una versión de producción estable y funcional.** 
-Cualquier cambio para la v7.0 DEBE realizarse siguiendo este workflow de Git:
-1. **Crear Rama Separada**: `git checkout -b feat/style-engine-v7`.
-2. **Protección de Main**: No realizar merges a `main` hasta que el usuario haya validado el nuevo "Modo Pro".
+## 📌 ESTADO ACTUAL: V7.0 ("Gallery Style Edition") CONSOLIDADO
 
-## 📍 ESTADO ACTUAL (v6.1 "WYSIWYG Edition")
-El proyecto ha alcanzado un hito de estabilidad con las siguientes funciones core:
-- **Previsualización 1:1**: El diseño en pantalla es idéntico al PDF (coordenadas alineadas).
-- **Dimensiones Dinámicas**: El usuario puede cambiar el ancho/alto del rótulo en CM en tiempo real.
-- **Grilla de PDF Inteligente**: El algoritmo calcula automáticamente cuántas etiquetas caben por página Letter según el tamaño elegido.
-- **T-Marks (Guías de Corte)**: Automáticas y dinámicas tanto en UI como en PDF.
-- **Escalado de Logo**: Manipulación libre de rotación y escalado proporcional (vía UI o entrada de PX).
-
-## 🚀 ROADMAP: MODO PRO (v7.0)
-El próximo objetivo es transformar el motor de etiquetas en un sistema configurable para galerías con estilos propios.
-
-### Requerimientos Clave:
-1. **Panel de Estilo de Galería**: Un módulo (con lógica para acceso premium) que permita:
-   - **Orden de Campos**: Cambiar el orden (ej. Título arriba del Autor).
-   - **Formato por Campo**: Toggles para Negrita (Bold), Cursiva (Italic) y Alineación.
-   - **Control de Interlineado**: Ajuste fino del espacio entre líneas para permitir logos o separadores entre ellas (ej. Eden Gallery style).
-2. **Interferencia Cero**: El usuario debe seguir escribiendo texto plano. El formato se aplica en la capa de renderizado (UI y PDF), no en la base de datos.
-3. **Persistencia**: La configuración de estilo debe guardarse globalmente en el proyecto.
-
-## ⚠️ LIMITACIONES TÉCNICAS
-- **Motor**: Mantener Vanilla JS/HTML/CSS (sin frameworks pesados).
-- **PDF**: Usar `jsPDF`. No romper el cálculo de grilla al añadir el motor de estilos.
+El hito **v7.0** ha sido alcanzado con éxito y se encuentra integrado y consolidado en la rama principal (`main`):
+- **Gallery Style Engine (Modo Pro)**:
+  - Sistema de alineación tipográfica dinámico (Izquierda, Centro, Derecha).
+  - Toggles por campo para Negrita (Bold) y Cursiva (Italic) independientes (Autor, Título, Fecha, Técnica, Medidas).
+  - Control granular de interlineado (Line Height de 0.8x a 2.0x).
+- **Fidelidad WYSIWYG 1:1 en PDF**:
+  - Coordenadas y transformaciones tipográficas sincronizadas de forma exacta entre el canvas/preview de UI y el motor de renderizado vectorial `jsPDF`.
+- **Arquitectura Limpia & Modularización**:
+  - Módulo matemático desacoplado `js/grid-calculator.js` (cálculo de grilla, márgenes y métricas en mm/px) exportable bajo patrón UMD.
+  - Catálogo de obras desacoplado del código fuente: soporte para subida masiva de `.json` en el cliente, persistencia en `localStorage` y plantilla pública `ejemplo-catalogo.json`.
+- **Integridad y QA**:
+  - Suite de verificación sintáctica `test-syntax.js` con ejecución en CI / pre-commit.
 
 ---
-*Fin del Handover - Listo para iniciar fase v7.0*
+
+## 🎯 PRÓXIMOS PASOS Y ROADMAP (v7.1 / v8.0)
+
+Con el núcleo tipográfico y la arquitectura desacoplada estables, las siguientes iniciativas prioritarias se orientan a optimizaciones de usabilidad y fidelidad visual:
+
+1. **Reordenamiento Drag & Drop de Campos Tipográficos**:
+   - Permitir a los usuarios reordenar visualmente el orden de renderizado de los campos en la etiqueta (ej. Título primero, seguido del Autor, o colocar fecha junto al título) mediante drag-and-drop en el panel de Modo Pro.
+   - Reflejar la secuencia de campos de manera reactiva en el preview y en la generación de `jsPDF`.
+
+2. **Exportación a Formatos Vectoriales SVG**:
+   - Extender la exportación para permitir descarga individual o por hoja en formato SVG nativo para su uso en cortadoras láser, trazadores y suites de diseño vectorial (Illustrator, Inkscape).
+
+3. **Perfiles de Galería Predefinidos (Presets)**:
+   - Crear una biblioteca de presets de galería (ej. "Estilo Museo Clásico", "Eden Gallery Modern", "Minimalista Contemporáneo") aplicables con un solo clic.
+
+---
+
+## ⚠️ DIRECTIVAS ARQUITECTÓNICAS DE MANTENIMIENTO
+
+- **Separación de Responsabilidades (SoC)**: Mantener la entrada de datos en texto plano. Las configuraciones de estilo residen en el estado visual (`state.styleConfig` o equivalentes) y se aplican en la capa de renderizado.
+- **Regla del "Chesterton's Fence"**: Respetar los cálculos matemáticos de `js/grid-calculator.js` y las optimizaciones de memoria en `jsPDF` (`createImageBitmap`).
+- **Validación Continua**: Ejecutar `node test-syntax.js` y `node -c script.js` antes de cualquier consolidación.
