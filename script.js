@@ -1072,24 +1072,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const doc = new jsPDF({ unit: 'mm', format: 'letter', orientation: 'portrait' });
             
             const pageW = 215.9, pageH = 279.4;
-            const labelW_mm = labelWidthCm * 10, labelH_mm = labelHeightCm * 10;
+            const labelW_mm = typeof window !== 'undefined' && window.GridCalculator ? window.GridCalculator.cmToMm(labelWidthCm) : labelWidthCm * 10;
+            const labelH_mm = typeof window !== 'undefined' && window.GridCalculator ? window.GridCalculator.cmToMm(labelHeightCm) : labelHeightCm * 10;
             const pageMargin = 10;
             
-            // Calculate how many fit
-            const maxCols = Math.floor((pageW - (pageMargin * 2)) / labelW_mm);
-            const maxRows = Math.floor((pageH - (pageMargin * 2)) / labelH_mm);
-            const itemsPerPage = maxCols * maxRows;
+            const gridConfig = typeof window !== 'undefined' && window.GridCalculator 
+                ? window.GridCalculator.calculatePageGrid(pageW, pageH, labelW_mm, labelH_mm, pageMargin)
+                : {
+                    maxCols: Math.floor((pageW - (pageMargin * 2)) / labelW_mm),
+                    maxRows: Math.floor((pageH - (pageMargin * 2)) / labelH_mm),
+                    itemsPerPage: Math.max(0, Math.floor((pageW - (pageMargin * 2)) / labelW_mm) * Math.floor((pageH - (pageMargin * 2)) / labelH_mm)),
+                    gridW: Math.floor((pageW - (pageMargin * 2)) / labelW_mm) * labelW_mm,
+                    gridH: Math.floor((pageH - (pageMargin * 2)) / labelH_mm) * labelH_mm,
+                    marginX: (pageW - (Math.floor((pageW - (pageMargin * 2)) / labelW_mm) * labelW_mm)) / 2,
+                    marginY: (pageH - (Math.floor((pageH - (pageMargin * 2)) / labelH_mm) * labelH_mm)) / 2
+                };
+
+            const { maxCols, maxRows, itemsPerPage, marginX, marginY } = gridConfig;
             
             if (itemsPerPage <= 0) return alert('El tamaño del rótulo es demasiado grande para la página.');
 
-            // Center the grid
-            const gridW = maxCols * labelW_mm;
-            const gridH = maxRows * labelH_mm;
-            const marginX = (pageW - gridW) / 2;
-            const marginY = (pageH - gridH) / 2;
-
-            const labelPreviewWidthPx = labelWidthCm * 37.79;
-            const labelPreviewHeightPx = labelHeightCm * 37.79;
+            const labelPreviewWidthPx = typeof window !== 'undefined' && window.GridCalculator ? window.GridCalculator.cmToPx(labelWidthCm) : labelWidthCm * 37.79;
+            const labelPreviewHeightPx = typeof window !== 'undefined' && window.GridCalculator ? window.GridCalculator.cmToPx(labelHeightCm) : labelHeightCm * 37.79;
 
             for (let index = 0; index < labelsToPrint.length; index++) {
                 const label = labelsToPrint[index];
