@@ -15,7 +15,13 @@
    - Comprobación opcional de datasets locales (`data.json`) sin bloquear el entorno de desarrollo público.
 2. **Plantilla de Catálogo Pública (`ejemplo-catalogo.json`)**:
    - Estructura desacoplada de la colección privada para permitir despliegue y uso abierto.
-3. **Pantalla de Bloqueo por PIN**:
+3. **Gestión e Importación Local de Catálogo de Obras**:
+   - Soporte para importación de catálogos masivos en formato JSON en el navegador.
+   - Persistencia local en `localStorage` (`artlabel_catalog`).
+   - Indicador de estado en tiempo real en la UI (obras disponibles).
+   - Descarga directa de la plantilla JSON de ejemplo desde el panel de creación.
+   - Búsqueda por número de inventario/Id con autocompletado y fallback amigable.
+4. **Pantalla de Bloqueo por PIN**:
    - Modal de seguridad inicial (PIN por defecto: `1234`).
 2. **Generación y Gestión de Rótulos**:
    - Búsqueda por número de inventario / Id number sobre `data.json`.

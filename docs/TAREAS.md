@@ -38,7 +38,7 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - Botón en UI para "Cargar Catálogo de Obras (.json)" con feedback visual.
   - Si el catálogo está cargado, buscar por Nro. de Bien autocompleta el formulario.
   - Si no hay catálogo cargado, modal o mensaje claro explicando cómo importar uno o usar la plantilla.
-- **Estado**: Pendiente
+- **Estado**: Completada (Merged a main)
 
 ---
 
