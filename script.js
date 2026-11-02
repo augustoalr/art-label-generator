@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const importProjectBtn = document.getElementById('import-project-btn');
     const exportProjectBtn = document.getElementById('export-project-btn');
     const importProjectInput = document.getElementById('import-project-input');
+    const importCatalogBtn = document.getElementById('import-catalog-btn');
+    const importCatalogInput = document.getElementById('import-catalog-input');
+    const catalogStatusEl = document.getElementById('catalog-status');
     const searchAssetBtn = document.getElementById('search-asset-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const decoTypeRadios = document.querySelectorAll('input[name="decoration-type"]');
@@ -82,6 +85,47 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: [],
         rooms: [],
         editingLabelId: null
+    };
+
+    // --- CATÁLOGO DE OBRAS LOCAL ---
+    let artCatalog = [];
+    const CATALOG_STORAGE_KEY = 'artlabel_catalog';
+
+    const updateCatalogStatusUI = () => {
+        if (!catalogStatusEl) return;
+        if (artCatalog && artCatalog.length > 0) {
+            catalogStatusEl.textContent = `Catálogo: ${artCatalog.length} obra${artCatalog.length === 1 ? '' : 's'} disponible${artCatalog.length === 1 ? '' : 's'}`;
+            catalogStatusEl.classList.add('loaded');
+        } else {
+            catalogStatusEl.textContent = 'Catálogo: No cargado';
+            catalogStatusEl.classList.remove('loaded');
+        }
+    };
+
+    const loadCatalog = () => {
+        try {
+            const storedCatalog = localStorage.getItem(CATALOG_STORAGE_KEY);
+            if (storedCatalog) {
+                const parsed = JSON.parse(storedCatalog);
+                if (Array.isArray(parsed)) {
+                    artCatalog = parsed;
+                }
+            }
+        } catch (e) {
+            console.error('Error al recuperar artCatalog de localStorage:', e);
+            artCatalog = [];
+        }
+        updateCatalogStatusUI();
+    };
+
+    const saveCatalog = (catalogData) => {
+        artCatalog = catalogData;
+        try {
+            localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(artCatalog));
+        } catch (e) {
+            console.error('Error al persistir artCatalog en localStorage:', e);
+        }
+        updateCatalogStatusUI();
     };
     
     // --- "ZONA DE PREPARACIÓN" PARA DECORACIONES ---
@@ -854,35 +898,75 @@ document.addEventListener('DOMContentLoaded', () => {
         populateRoomList(e.target.value);
     });
 
-    // --- BÚSQUEDA Y ACCIONES GLOBALES ---
+        // --- BÚSQUEDA Y ACCIONES GLOBALES ---
+    const populateFormWithArtData = (artData) => {
+        document.getElementById('author').value = artData.author || '';
+        document.getElementById('title').value = artData.title || '';
+        document.getElementById('date').value = artData.date || '';
+        document.getElementById('technique').value = artData.technique || '';
+        document.getElementById('measurements').value = artData.measurements || '';
+        document.getElementById('asset-number').value = artData.asset_number || '';
+        renderLivePreview();
+    };
+
+    const findArtInCatalog = (catalogList, targetAssetNumber) => {
+        if (!Array.isArray(catalogList) || catalogList.length === 0) return null;
+        return catalogList.find(item => {
+            if (!item || item.asset_number === undefined || item.asset_number === null) return false;
+            const assetNumbers = String(item.asset_number).split('/');
+            return assetNumbers.includes(targetAssetNumber);
+        }) || null;
+    };
+
     searchAssetBtn.addEventListener('click', async () => {
         const assetNumberInput = document.getElementById('asset-number').value.trim();
         if (!assetNumberInput) return alert('Por favor, introduce un Número de Bien para buscar.');
-        try {
-            const response = await fetch('data.json');
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            
-            const artData = data.find(item => {
-                const assetNumbers = String(item.asset_number).split('/');
-                return assetNumbers.includes(assetNumberInput);
-            });
 
-            if (artData) {
-                document.getElementById('author').value = artData.author;
-                document.getElementById('title').value = artData.title;
-                document.getElementById('date').value = artData.date;
-                document.getElementById('technique').value = artData.technique;
-                document.getElementById('measurements').value = artData.measurements;
-                document.getElementById('asset-number').value = artData.asset_number; 
-                renderLivePreview();
-            } else { 
-                alert('Número de Bien no encontrado en la base de datos.'); 
+        // 1. Buscar en el catálogo local persistido / en memoria
+        if (Array.isArray(artCatalog) && artCatalog.length > 0) {
+            const foundArt = findArtInCatalog(artCatalog, assetNumberInput);
+            if (foundArt) {
+                populateFormWithArtData(foundArt);
+                return;
             }
-        } catch (error) { 
-            console.error('Error al cargar el archivo JSON:', error); 
-            alert('No se pudo cargar la base de datos de obras.'); 
+            alert('Número de Bien no encontrado en el catálogo cargado.');
+            return;
         }
+
+        // 2. Si no hay catálogo cargado, intentar fetch fallback (data.json o ejemplo-catalogo.json)
+        let fallbackCatalog = null;
+        try {
+            const responseData = await fetch('data.json');
+            if (responseData.ok) {
+                fallbackCatalog = await responseData.json();
+            }
+        } catch (e) {
+            // Silencioso
+        }
+
+        if (!fallbackCatalog) {
+            try {
+                const responseExample = await fetch('ejemplo-catalogo.json');
+                if (responseExample.ok) {
+                    fallbackCatalog = await responseExample.json();
+                }
+            } catch (e) {
+                // Silencioso
+            }
+        }
+
+        if (Array.isArray(fallbackCatalog) && fallbackCatalog.length > 0) {
+            const foundArt = findArtInCatalog(fallbackCatalog, assetNumberInput);
+            if (foundArt) {
+                populateFormWithArtData(foundArt);
+                return;
+            }
+            alert('Número de Bien no encontrado en la base de datos.');
+            return;
+        }
+
+        // 3. Fallback final si no hay ningún catálogo disponible
+        alert("No hay catálogo de obras cargado. Por favor, usa el botón 'Import Catalog' para cargar tu archivo .json de obras o ingresa los datos manualmente.");
     });
 
     clearAllBtn.addEventListener('click', async () => {
@@ -912,6 +996,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     importProjectBtn.addEventListener('click', () => importProjectInput.click());
+
+    // --- IMPORTACIÓN DE CATÁLOGO ---
+    if (importCatalogBtn && importCatalogInput) {
+        importCatalogBtn.addEventListener('click', () => importCatalogInput.click());
+
+        importCatalogInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const parsedData = JSON.parse(event.target.result);
+                    if (!Array.isArray(parsedData)) {
+                        alert('El archivo no contiene un catálogo válido (debe ser un array de obras en formato JSON).');
+                        return;
+                    }
+
+                    const validItems = parsedData.filter(item => item && typeof item === 'object' && item.asset_number !== undefined && item.asset_number !== null && String(item.asset_number).trim() !== '');
+                    if (validItems.length === 0) {
+                        alert('No se encontraron obras válidas con "asset_number" en el archivo proporcionado.');
+                        return;
+                    }
+
+                    saveCatalog(validItems);
+                    alert(`Catálogo cargado con ${validItems.length} obras.`);
+                } catch (err) {
+                    console.error('Error al parsear el archivo de catálogo:', err);
+                    alert('Error al leer el archivo JSON de catálogo. Verifica que el formato sea correcto.');
+                }
+            };
+            reader.readAsText(file);
+            importCatalogInput.value = '';
+        });
+    }
 
     importProjectInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -1198,5 +1317,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZACIÓN ---
     loadState();
+    loadCatalog();
     renderUI();
 });

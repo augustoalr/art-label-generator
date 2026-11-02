@@ -31,7 +31,16 @@
             <div class="card">
                 <h2 class="card-title"><i class="fas fa-edit"></i>Creation panel</h2>
                 <form id="label-form">
-                       <div class="form-group"><label for="asset-number">Id number</label>
+                       <div class="form-group">
+                           <div class="label-header-row">
+                               <label for="asset-number" style="margin-bottom: 0;">Id number</label>
+                               <div class="catalog-actions-inline">
+                                   <input type="file" id="import-catalog-input" accept=".json" style="display: none;">
+                                   <button type="button" id="import-catalog-btn" class="catalog-btn" title="Cargar archivo .json con catálogo de obras"><i class="fas fa-file-import"></i> Import Catalog</button>
+                                   <a href="ejemplo-catalogo.json" download="ejemplo-catalogo.json" class="catalog-link" title="Descargar plantilla de ejemplo JSON"><i class="fas fa-file-download"></i> Plantilla</a>
+                               </div>
+                           </div>
+                           <div class="catalog-status" id="catalog-status">Catálogo: No cargado</div>
                         <div class="input-with-icon"><input type="text" id="asset-number" placeholder="Ej: 779"
                                 required><button type="button" id="search-asset-btn" class="search-btn"
                                 title="Buscar por Nro. de Bien"><i class="fas fa-search"></i></button></div>
