@@ -43,10 +43,13 @@
    - Cálculo automático de grilla por página según dimensiones del rótulo.
    - Manejo optimizado de imágenes con `createImageBitmap` y escala máxima (800px) para evitar bloqueos del navegador.
    - Exportación de todas las etiquetas o filtradas por sala ("Room").
-6. **Style Engine v7.0 (Estructura de Datos Lista)**:
-   - Objeto `DEFAULT_STYLE_CONFIG` y `state.styleConfig` integrados.
-   - Soporte para alineación de texto, flags `bold`/`italic`/`visible` por campo y multiplicador de espaciado.
-   - Retrocompatibilidad asegurada en `loadState` y `importProject`.
+6. **Style Engine v7.0 (Modo Pro UI & Previsualización Reactiva)**:
+   - Panel colapsable accesible "Gallery Style (Pro Mode)".
+   - Controles de alineación de texto (izquierda, centro, derecha).
+   - Toggles independientes de Negrita (**B**) y Cursiva (*I*) por cada campo del rótulo.
+   - Control de interlineado (slider 0.8x a 2.0x).
+   - Botón de restauración rápida "Reset to Default Style".
+   - Sincronización instantánea con la previsualización en vivo (WYSIWYG 1:1).
 7. **Persistencia**:
    - Almacenamiento local mediante `localStorage`.
    - Importación y exportación de archivos `.artlabel` (JSON).

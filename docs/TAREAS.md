@@ -67,9 +67,24 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
 
 ### [TASK-004] Interfaz UI para Configuración de Estilo de Galería (Modo Pro)
 - **ID**: `TASK-004`
-- **Objetivo**: Añadir en `index.html` y estilizar en `style.css` un acordeón/panel para configuración de estilo (alineación, bold/italic de campos).
-- **Archivos que toca**: `index.html`, `style.css`
+- **Objetivo**: Añadir en `index.html` y estilizar en `style.css` un acordeón/panel colapsable de "Estilo de Galería (Modo Pro)" con controles para alineación (izq/centro/der), toggles de negrita y cursiva por campo, y sincronización bidireccional con `state.styleConfig`.
+- **Archivos que toca**: `index.html`, `style.css`, `script.js`
 - **Criterios de Aceptación**:
-  - Controles visuales accesibles y coherentes con los tokens de diseño existentes.
-  - No interfiere con el layout actual de previsualización en dos columnas.
-- **Estado**: Pendiente
+  - Controles visuales intuitivos sin saturar la vista.
+  - Sincronización en vivo con `state.styleConfig`.
+  - Al cambiar un ajuste se refleja inmediatamente en la previsualización (`renderLivePreview`).
+  - No altera el formato de texto plano de los inputs ni de la base de datos de obras.
+- **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-007] Integrar Motor de Estilos (Modo Pro) en la Generación de PDF (jsPDF)
+- **ID**: `TASK-007`
+- **Objetivo**: Conectar `state.styleConfig` en la rutina `generatePDF` para que la alineación (izquierda, centro, derecha), pesos de fuente (bold, italic) e interlineado configurados en la UI se reproduzcan idénticamente 1:1 en el documento PDF descargado.
+- **Archivos que toca**: `script.js`
+- **Criterios de Aceptación**:
+  - jsPDF aplica fuentes en negrita (`setFont(undefined, 'bold')`) y cursiva (`setFont(undefined, 'italic')`) de acuerdo a `state.styleConfig.fields`.
+  - El texto en PDF se alinea según `state.styleConfig.textAlign`.
+  - Respeta el multiplicador de interlineado sin desbordar los límites de corte del rótulo.
+  - Verificado con `test-syntax.js` código 0.
+- **Estado**: En progreso (Asignada a subagente)
