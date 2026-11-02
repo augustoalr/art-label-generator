@@ -1,41 +1,33 @@
-# Handover Prompt for Next AI Agent
+# Art Label Generator V6.1 - Manual de Traspaso (v7.0)
 
-Welcome, AI Agent! You are taking over the **Art Label Generator V6.1** project. This is a high-performance, professional tool for creating museum labels.
+## 🛡️ DIRECTIVA CRÍTICA: AISLAR LA ESTABILIDAD
+**La versión 6.1 es una versión de producción estable y funcional.** 
+Cualquier cambio para la v7.0 DEBE realizarse siguiendo este workflow de Git:
+1. **Crear Rama Separada**: `git checkout -b feat/style-engine-v7`.
+2. **Protección de Main**: No realizar merges a `main` hasta que el usuario haya validado el nuevo "Modo Pro".
 
-## Current State & Context
+## 📍 ESTADO ACTUAL (v6.1 "WYSIWYG Edition")
+El proyecto ha alcanzado un hito de estabilidad con las siguientes funciones core:
+- **Previsualización 1:1**: El diseño en pantalla es idéntico al PDF (coordenadas alineadas).
+- **Dimensiones Dinámicas**: El usuario puede cambiar el ancho/alto del rótulo en CM en tiempo real.
+- **Grilla de PDF Inteligente**: El algoritmo calcula automáticamente cuántas etiquetas caben por página Letter según el tamaño elegido.
+- **T-Marks (Guías de Corte)**: Automáticas y dinámicas tanto en UI como en PDF.
+- **Escalado de Logo**: Manipulación libre de rotación y escalado proporcional (vía UI o entrada de PX).
 
-The project is currently stable after a series of critical fixes in V6.1. The core focus is on **visual excellence**, **printing precision (CM/MM)**, and **memory-safe PDF generation**.
+## 🚀 ROADMAP: MODO PRO (v7.0)
+El próximo objetivo es transformar el motor de etiquetas en un sistema configurable para galerías con estilos propios.
 
-### Key Technical Aspects
+### Requerimientos Clave:
+1. **Panel de Estilo de Galería**: Un módulo (con lógica para acceso premium) que permita:
+   - **Orden de Campos**: Cambiar el orden (ej. Título arriba del Autor).
+   - **Formato por Campo**: Toggles para Negrita (Bold), Cursiva (Italic) y Alineación.
+   - **Control de Interlineado**: Ajuste fino del espacio entre líneas para permitir logos o separadores entre ellas (ej. Eden Gallery style).
+2. **Interferencia Cero**: El usuario debe seguir escribiendo texto plano. El formato se aplica en la capa de renderizado (UI y PDF), no en la base de datos.
+3. **Persistencia**: La configuración de estilo debe guardarse globalmente en el proyecto.
 
-- **Architecture**:
-  - `state`: Central object in `script.js` containing `labels`, `rooms`, and `editingLabelId`.
-  - `renderLivePreview()`: Core function that updates the visual label mockup in real-time. It separates rendering logic for **Arabesque** and **Neutral Logo (Institutional)**.
-  - `generatePDF()`: Uses `jsPDF` to build A4/Letter pages with 2x4 label grids.
+## ⚠️ LIMITACIONES TÉCNICAS
+- **Motor**: Mantener Vanilla JS/HTML/CSS (sin frameworks pesados).
+- **PDF**: Usar `jsPDF`. No romper el cálculo de grilla al añadir el motor de estilos.
 
-- **Critical Fixes (V6.1) - Read carefully!**:
-  - **PDF Performance & Hanging**: Previously, high-res images and Base64 strings crashed the `jsPDF` rendering loop. We replaced the `new Image()` + `onload` promise with `createImageBitmap()` (Web API) for reliable, non-blocking image processing. It also limits max dimensions to 800px for stability.
-  - **Scaling Jumps**: Handled distance vectors correctly in `isResizing` logic to ensure smooth, diagonal-based scaling.
-  - **Layout Shifts**: Fixed a floating `</div>` in `index.html` that broke the CSS grid alignment.
-
-- **UI Components**:
-  - `Mini-Map widget`: Displays how many pages the labels fill (2x4 grid).
-  - `Magnetic Snapping`: Automatically snaps logos to the center of the label using `guide-line` classes.
-  - `Layer Management`: Switches `z-index` of the logo between `0` (back) and `10` (front).
-
-## Your Mission
-
-When you continue, maintain the "Zero-Cost, High-Portability" principle. The code is pure JS, HTML, and CSS (no frameworks like React/Tailwind). 
-
-### Immediate To-Do's (Recommended):
-
-1. **Verify PDF Generation**: Always ensure that labels with and without logos appear correctly in the downloaded PDF.
-2. **Layering Persistence**: Check if the `z-index` (Back/Front) is correctly saved and loaded when editing a label previously saved.
-3. **Responsive UI**: Ensure the sidebar and design panel maintain their 2-column structure in different resolution screens.
-
-### Code Style:
-- Use clean, modular CSS.
-- Keep `script.js` as the single source of truth for logic to ensure simplicity.
-- When adding features, always update `renderLivePreview()` first to reflect changes visually.
-
-Good luck!
+---
+*Fin del Handover - Listo para iniciar fase v7.0*
