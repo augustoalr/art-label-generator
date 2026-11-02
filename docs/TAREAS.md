@@ -87,4 +87,14 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - El texto en PDF se alinea según `state.styleConfig.textAlign`.
   - Respeta el multiplicador de interlineado sin desbordar los límites de corte del rótulo.
   - Verificado con `test-syntax.js` código 0.
+- **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-008] Actualización de Documentación v7.0 y Guía de Uso del Modo Pro
+- **ID**: `TASK-008`
+- **Objetivo**: Actualizar `README.md` y `HANDOVER_PROMPT.md` documentando las nuevas capacidades v7.0 (Catálogo Local Desacoplado, Importación Masiva, Galería Modo Pro con formatos tipográficos por campo e interlineado, y cálculo modular de grilla).
+- **Archivos que toca**: `README.md`, `HANDOVER_PROMPT.md`
+- **Criterios de Aceptación**:
+  - Documentación clara y precisa del flujo de trabajo, compatibilidad y atajos.
 - **Estado**: En progreso (Asignada a subagente)

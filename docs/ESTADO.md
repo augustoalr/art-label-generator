@@ -1,7 +1,7 @@
 # Estado del Proyecto - Art Label Generator
 
-## Versión Actual: 6.1 ("WYSIWYG Edition")
-- **Estado General**: Producción Estable + Verificación Estática Automatizada.
+## Versión Actual: 7.0 ("Gallery Style Edition")
+- **Estado General**: Producción Estable con Motor de Estilos Avanzado.
 - **Rama Principal**: `main`.
 - **Última Revisión de Arquitectura**: 02/11/2026.
 
@@ -13,15 +13,22 @@
    - Inspección automática de sintaxis JS en todo el proyecto (`node -c`).
    - Validación obligatoria de plantilla pública (`ejemplo-catalogo.json`).
    - Comprobación opcional de datasets locales (`data.json`) sin bloquear el entorno de desarrollo público.
-2. **Plantilla de Catálogo Pública (`ejemplo-catalogo.json`)**:
-   - Estructura desacoplada de la colección privada para permitir despliegue y uso abierto.
-3. **Gestión e Importación Local de Catálogo de Obras**:
-   - Soporte para importación de catálogos masivos en formato JSON en el navegador.
+2. **Plantilla y Catálogo de Obras Desacoplado**:
+   - Desvinculación de bases de datos privadas del repositorio.
+   - Importación de catálogos JSON masivos directamente desde la UI (`importCatalogBtn`).
    - Persistencia local en `localStorage` (`artlabel_catalog`).
-   - Indicador de estado en tiempo real en la UI (obras disponibles).
-   - Descarga directa de la plantilla JSON de ejemplo desde el panel de creación.
-   - Búsqueda por número de inventario/Id con autocompletado y fallback amigable.
-4. **Pantalla de Bloqueo por PIN**:
+   - Búsqueda por número de inventario/Id con autocompletado y fallback descriptivo.
+3. **Módulo de Cálculo de Grilla (`js/grid-calculator.js`)**:
+   - Funciones puras independientes del DOM (`calculatePageGrid`, `cmToMm`, `cmToPx`).
+   - Soporte UMD (compatible con navegador y testing en Node.js).
+4. **Motor de Estilos de Galería (Modo Pro v7.0 - UI y PDF WYSIWYG 1:1)**:
+   - Panel interactivo colapsable "Gallery Style (Pro Mode)".
+   - Alineación configurable: Izquierda, Centro, Derecha (sincronizada en Live Preview y jsPDF).
+   - Toggles independientes de Negrita (**B**) y Cursiva (*I*) por cada campo (`author`, `title`, `date`, `technique`, `measurements`).
+   - Control de interlineado continuo (0.8x a 2.0x) con cálculo dinámico de espaciado en pantalla e impresión.
+   - Sincronización en tiempo real entre pantalla y exportación de PDF (`jsPDF`).
+   - Retrocompatibilidad asegurada con proyectos `.artlabel` existentes.
+5. **Pantalla de Bloqueo por PIN**:
    - Modal de seguridad inicial (PIN por defecto: `1234`).
 2. **Generación y Gestión de Rótulos**:
    - Búsqueda por número de inventario / Id number sobre `data.json`.
