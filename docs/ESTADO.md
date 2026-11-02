@@ -43,7 +43,11 @@
    - Cálculo automático de grilla por página según dimensiones del rótulo.
    - Manejo optimizado de imágenes con `createImageBitmap` y escala máxima (800px) para evitar bloqueos del navegador.
    - Exportación de todas las etiquetas o filtradas por sala ("Room").
-6. **Persistencia**:
+6. **Style Engine v7.0 (Estructura de Datos Lista)**:
+   - Objeto `DEFAULT_STYLE_CONFIG` y `state.styleConfig` integrados.
+   - Soporte para alineación de texto, flags `bold`/`italic`/`visible` por campo y multiplicador de espaciado.
+   - Retrocompatibilidad asegurada en `loadState` y `importProject`.
+7. **Persistencia**:
    - Almacenamiento local mediante `localStorage`.
    - Importación y exportación de archivos `.artlabel` (JSON).
 

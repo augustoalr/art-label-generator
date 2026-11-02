@@ -61,7 +61,7 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
 - **Criterios de Aceptación**:
   - `state.styleConfig` con valores por defecto que mantengan exactamente la apariencia actual si no se modifica.
   - Compatibilidad total hacia atrás con proyectos `.artlabel` existentes.
-- **Estado**: Pendiente
+- **Estado**: Completada (Merged a main)
 
 ---
 
