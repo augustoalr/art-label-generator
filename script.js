@@ -1243,10 +1243,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             doc.setFont('arial'); doc.setTextColor(0, 0, 0);
+
+            // --- CONFIGURACIÓN DE ESTILO DINÁMICA (MODO PRO / WYSIWYG 1:1) ---
+            const styleConfig = state.styleConfig || DEFAULT_STYLE_CONFIG;
+            const textAlign = styleConfig.textAlign || 'center';
+            const lineSpacing = styleConfig.lineSpacingMultiplier !== undefined ? styleConfig.lineSpacingMultiplier : 1.0;
+            const fieldsMap = (styleConfig.fields || DEFAULT_STYLE_CONFIG.fields).reduce((acc, f) => {
+                acc[f.id] = f;
+                return acc;
+            }, {});
+
+            const getFieldFontStyle = (fieldId, defaultBold = false, defaultItalic = false) => {
+                const f = fieldsMap[fieldId];
+                const isBold = f ? !!f.bold : defaultBold;
+                const isItalic = f ? !!f.italic : defaultItalic;
+
+                if (isBold && isItalic) return 'bolditalic';
+                if (isBold && !isItalic) return 'bold';
+                if (!isBold && isItalic) return 'italic';
+                return 'normal';
+            };
+
+            const isFieldVisible = (fieldId) => {
+                const f = fieldsMap[fieldId];
+                return f ? f.visible !== false : true;
+            };
+
+            const authorStyle = getFieldFontStyle('author', true, false);
+            const titleStyle = getFieldFontStyle('title', false, true);
+            const dateStyle = getFieldFontStyle('date', false, false);
+            const techStyle = getFieldFontStyle('technique', false, false);
+            const measStyle = getFieldFontStyle('measurements', false, false);
+
+            const paddingLeft_mm = safeMargin + 3;
+            const paddingRight_mm = safeMargin + 3;
+            let textX = x + (labelW_mm / 2);
+            let textOptions = { align: 'center' };
+
+            if (textAlign === 'left') {
+                textX = x + paddingLeft_mm;
+                textOptions = { align: 'left' };
+            } else if (textAlign === 'right') {
+                textX = x + labelW_mm - paddingRight_mm;
+                textOptions = { align: 'right' };
+            }
             
             // --- CORRECCIÓN PARA SALTO DE LÍNEA Y AUTO-SHRINK DE TEXTO ---
             const maxWidth = labelW_mm - (safeMargin * 2) - 6;
-            const textX = x + safeMargin + 3;
             const decoHeightFallback = labelH_mm * 0.18;
             const startY = y + (type === 'arabesque' ? decoHeightFallback + 5 : 10);
             const availableHeight = labelH_mm - (type === 'arabesque' ? (decoHeightFallback * 2) + 10 : 20);
@@ -1254,24 +1297,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const minFontSize = 6;
             let currentFontSize = 12;
             let fitted = false;
-            let authorLines, titleLines, dateLines, techLines, measLines;
+            let authorLines = [], titleLines = [], dateLines = [], techLines = [], measLines = [];
             let lineHeight;
 
             while (!fitted && currentFontSize >= minFontSize) {
                 doc.setFontSize(currentFontSize);
-                lineHeight = currentFontSize * 0.3527 * 1.2; 
+                lineHeight = currentFontSize * 0.3527 * 1.2 * lineSpacing; 
                 
-                doc.setFont('arial', 'bold');
-                authorLines = doc.splitTextToSize(label.author, maxWidth);
-                doc.setFont('arial', 'italic');
-                titleLines = doc.splitTextToSize(label.title, maxWidth);
-                doc.setFont('arial', 'normal');
-                dateLines = doc.splitTextToSize(label.date, maxWidth);
-                techLines = doc.splitTextToSize(label.technique, maxWidth);
-                measLines = doc.splitTextToSize(label.measurements, maxWidth);
+                doc.setFont('arial', authorStyle);
+                authorLines = (isFieldVisible('author') && label.author) ? doc.splitTextToSize(label.author, maxWidth) : [];
+                doc.setFont('arial', titleStyle);
+                titleLines = (isFieldVisible('title') && label.title) ? doc.splitTextToSize(label.title, maxWidth) : [];
+                doc.setFont('arial', dateStyle);
+                dateLines = (isFieldVisible('date') && label.date) ? doc.splitTextToSize(label.date, maxWidth) : [];
+                doc.setFont('arial', techStyle);
+                techLines = (isFieldVisible('technique') && label.technique) ? doc.splitTextToSize(label.technique, maxWidth) : [];
+                doc.setFont('arial', measStyle);
+                measLines = (isFieldVisible('measurements') && label.measurements) ? doc.splitTextToSize(label.measurements, maxWidth) : [];
                 
                 const totalLines = authorLines.length + titleLines.length + dateLines.length + techLines.length + measLines.length;
-                const totalPadding = 4 * Math.max(1, (currentFontSize / 12 * 2));
+                const fieldGaps = [authorLines, titleLines, dateLines, techLines, measLines].filter(lines => lines.length > 0).length - 1;
+                const totalPadding = Math.max(0, fieldGaps) * Math.max(1, (currentFontSize / 12 * 2)) * lineSpacing;
                 const totalRequiredHeight = (totalLines * lineHeight) + totalPadding;
                 
                 if (totalRequiredHeight <= availableHeight || currentFontSize === minFontSize) {
@@ -1282,24 +1328,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let textY = startY + lineHeight;
-            const padding = Math.max(1, currentFontSize / 12 * 2);
+            const padding = Math.max(1, currentFontSize / 12 * 2) * lineSpacing;
 
-            doc.setFont('arial', 'bold');
-            doc.text(authorLines, textX, textY);
-            textY += (authorLines.length * lineHeight) + padding;
+            if (authorLines.length > 0) {
+                doc.setFont('arial', authorStyle);
+                doc.text(authorLines, textX, textY, textOptions);
+                textY += (authorLines.length * lineHeight) + padding;
+            }
 
-            doc.setFont('arial', 'italic');
-            doc.text(titleLines, textX, textY);
-            textY += (titleLines.length * lineHeight) + padding;
+            if (titleLines.length > 0) {
+                doc.setFont('arial', titleStyle);
+                doc.text(titleLines, textX, textY, textOptions);
+                textY += (titleLines.length * lineHeight) + padding;
+            }
 
-            doc.setFont('arial', 'normal');
-            doc.text(dateLines, textX, textY);
-            textY += (dateLines.length * lineHeight) + padding;
+            if (dateLines.length > 0) {
+                doc.setFont('arial', dateStyle);
+                doc.text(dateLines, textX, textY, textOptions);
+                textY += (dateLines.length * lineHeight) + padding;
+            }
 
-            doc.text(techLines, textX, textY);
-            textY += (techLines.length * lineHeight) + padding;
+            if (techLines.length > 0) {
+                doc.setFont('arial', techStyle);
+                doc.text(techLines, textX, textY, textOptions);
+                textY += (techLines.length * lineHeight) + padding;
+            }
 
-            doc.text(measLines, textX, textY);
+            if (measLines.length > 0) {
+                doc.setFont('arial', measStyle);
+                doc.text(measLines, textX, textY, textOptions);
+            }
             // --- FIN DE LA CORRECCIÓN AUTO-SHRINK ---
             
             doc.setFontSize(11);
