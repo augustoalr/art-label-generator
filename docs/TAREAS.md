@@ -18,6 +18,30 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
 
 ---
 
+### [TASK-005] Desvincular data.json privado y crear plantilla pública
+- **ID**: `TASK-005`
+- **Objetivo**: Eliminar del seguimiento `data.json` privado, crear `ejemplo-catalogo.json` como plantilla de ejemplo y adaptar `test-syntax.js` para que la comprobación no falle si `data.json` no existe.
+- **Archivos que toca**: `data.json` (eliminado), `ejemplo-catalogo.json` (nuevo), `test-syntax.js`
+- **Criterios de Aceptación**:
+  - `data.json` ya no existe en el repositorio.
+  - `ejemplo-catalogo.json` contiene la estructura canónica esperada (`author`, `title`, `date`, `technique`, `measurements`, `asset_number`).
+  - `node test-syntax.js` pasa con código 0.
+- **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-006] Catálogo Local en Navegador e Importación Masiva
+- **ID**: `TASK-006`
+- **Objetivo**: Permitir al usuario cargar su catálogo de obras en formato JSON directamente desde la UI, almacenarlo en `localStorage` (o memoria) y conectar el buscador `searchAssetBtn` a ese almacén local en lugar de `fetch('data.json')`.
+- **Archivos que toca**: `index.html`, `script.js`, `style.css`
+- **Criterios de Aceptación**:
+  - Botón en UI para "Cargar Catálogo de Obras (.json)" con feedback visual.
+  - Si el catálogo está cargado, buscar por Nro. de Bien autocompleta el formulario.
+  - Si no hay catálogo cargado, modal o mensaje claro explicando cómo importar uno o usar la plantilla.
+- **Estado**: Pendiente
+
+---
+
 ### [TASK-002] Modularizar helpers matemáticos y cálculo de grilla de PDF
 - **ID**: `TASK-002`
 - **Objetivo**: Extraer la lógica pura de cálculo de distribución de etiquetas en hoja Letter/A4 y conversión de CM/PX a un módulo de utilidad comprobable.

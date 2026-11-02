@@ -11,8 +11,11 @@
 
 1. **Suite de Verificación Estática (`test-syntax.js`)**:
    - Inspección automática de sintaxis JS en todo el proyecto (`node -c`).
-   - Validación de formato e integridad del dataset estático (`data.json`).
-2. **Pantalla de Bloqueo por PIN**:
+   - Validación obligatoria de plantilla pública (`ejemplo-catalogo.json`).
+   - Comprobación opcional de datasets locales (`data.json`) sin bloquear el entorno de desarrollo público.
+2. **Plantilla de Catálogo Pública (`ejemplo-catalogo.json`)**:
+   - Estructura desacoplada de la colección privada para permitir despliegue y uso abierto.
+3. **Pantalla de Bloqueo por PIN**:
    - Modal de seguridad inicial (PIN por defecto: `1234`).
 2. **Generación y Gestión de Rótulos**:
    - Búsqueda por número de inventario / Id number sobre `data.json`.
