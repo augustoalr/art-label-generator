@@ -80,11 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoPosXInput = document.getElementById('logo-pos-x');
     const logoPosYInput = document.getElementById('logo-pos-y');
 
+    // --- CONFIGURACIÓN POR DEFECTO PARA ESTILOS DE ETIQUETA (MODO PRO / STYLE ENGINE) ---
+    const DEFAULT_STYLE_CONFIG = {
+        textAlign: 'center', // 'left', 'center', 'right'
+        fields: [
+            { id: 'author', bold: true, italic: false, visible: true },
+            { id: 'title', bold: false, italic: true, visible: true },
+            { id: 'date', bold: false, italic: false, visible: true },
+            { id: 'technique', bold: false, italic: false, visible: true },
+            { id: 'measurements', bold: false, italic: false, visible: true }
+        ],
+        lineSpacingMultiplier: 1.0
+    };
+
     // --- ESTADO DE LA APLICACIÓN ---
     let state = {
         labels: [],
         rooms: [],
-        editingLabelId: null
+        editingLabelId: null,
+        styleConfig: JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG))
     };
 
     // --- CATÁLOGO DE OBRAS LOCAL ---
@@ -182,7 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
         state = { 
             labels: parsedState.labels || [], 
             rooms: parsedState.rooms || [], 
-            editingLabelId: null 
+            editingLabelId: null,
+            styleConfig: parsedState.styleConfig ? JSON.parse(JSON.stringify(parsedState.styleConfig)) : JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG))
         };
 
         if (parsedState.labelWidthCm) {
@@ -1041,6 +1056,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const importedState = JSON.parse(event.target.result);
                 if (importedState && Array.isArray(importedState.labels)) {
                     state = importedState;
+                    if (!state.styleConfig) {
+                        state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+                    }
                     saveState();
                     renderUI();
                     alert('Proyecto cargado exitosamente.');
