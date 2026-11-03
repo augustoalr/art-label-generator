@@ -81,7 +81,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoPosYInput = document.getElementById('logo-pos-y');
 
     // --- CONFIGURACIÓN POR DEFECTO PARA ESTILOS DE ETIQUETA (MODO PRO / STYLE ENGINE) ---
+    const FONT_MAP = {
+        arial: {
+            css: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
+            pdf: 'arial'
+        },
+        times: {
+            css: "'Times New Roman', Times, 'Playfair Display', Georgia, serif",
+            pdf: 'times'
+        },
+        courier: {
+            css: "'Courier New', Courier, monospace",
+            pdf: 'courier'
+        }
+    };
+
+    // --- CONFIGURACIÓN POR DEFECTO PARA ESTILOS DE ETIQUETA (MODO PRO / STYLE ENGINE) ---
     const DEFAULT_STYLE_CONFIG = {
+        fontFamily: 'arial', // 'arial' (Sans-serif), 'times' (Serif clásica), 'courier' (Monospace técnica)
+        baseFontSize: 12,    // Tamaño base en puntos (rango 8 a 16 pt)
         textAlign: 'center', // 'left', 'center', 'right'
         fields: [
             { id: 'author', bold: true, italic: false, visible: true },
@@ -200,6 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
             styleConfig: parsedState.styleConfig ? JSON.parse(JSON.stringify(parsedState.styleConfig)) : JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG))
         };
 
+        if (state.styleConfig) {
+            if (!state.styleConfig.fontFamily) state.styleConfig.fontFamily = DEFAULT_STYLE_CONFIG.fontFamily;
+            if (state.styleConfig.baseFontSize === undefined) state.styleConfig.baseFontSize = DEFAULT_STYLE_CONFIG.baseFontSize;
+        }
+
         if (parsedState.labelWidthCm) {
             labelWidthCm = parsedState.labelWidthCm;
             labelWidthInput.value = labelWidthCm;
@@ -292,6 +315,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const styleCfg = state.styleConfig || DEFAULT_STYLE_CONFIG;
         const textAlign = styleCfg.textAlign || 'center';
         const lineSpacing = styleCfg.lineSpacingMultiplier !== undefined ? styleCfg.lineSpacingMultiplier : 1.0;
+        const currentFontKey = styleCfg.fontFamily || 'arial';
+        const cssFontFamily = (FONT_MAP[currentFontKey] && FONT_MAP[currentFontKey].css) || FONT_MAP.arial.css;
+        const baseFontSizePt = (typeof styleCfg.baseFontSize === 'number') ? styleCfg.baseFontSize : 12;
+        const previewFontSizePx = Math.round(baseFontSizePt * 1.3333); // 1pt ≈ 1.3333px at 96 DPI
         const fieldsCfg = (styleCfg.fields || DEFAULT_STYLE_CONFIG.fields).reduce((acc, f) => {
             acc[f.id] = f;
             return acc;
@@ -305,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `font-weight: ${weight}; font-style: ${style}; display: ${display};`;
         };
 
-        const textContentHTML = `<div class="label-content-container" style="text-align: ${textAlign};"><div class="label-text-block" style="line-height: ${lineSpacing};"><p class="label-author" style="${getFieldStyle('author')}">${data.author||''}</p><p class="label-title" style="${getFieldStyle('title')}">${data.title||''}</p><p class="label-date" style="${getFieldStyle('date')}">${data.date||''}</p><p class="label-technique" style="${getFieldStyle('technique')}">${data.technique||''}</p><p class="label-measurements" style="${getFieldStyle('measurements')}">${data.measurements||''}</p></div></div><p class="label-asset-number">${data.assetNumber||''}</p>`;
+        const textContentHTML = `<div class="label-content-container" style="text-align: ${textAlign}; font-family: ${cssFontFamily}; font-size: ${previewFontSizePx}px;"><div class="label-text-block" style="line-height: ${lineSpacing};"><p class="label-author" style="${getFieldStyle('author')}">${data.author||''}</p><p class="label-title" style="${getFieldStyle('title')}">${data.title||''}</p><p class="label-date" style="${getFieldStyle('date')}">${data.date||''}</p><p class="label-technique" style="${getFieldStyle('technique')}">${data.technique||''}</p><p class="label-measurements" style="${getFieldStyle('measurements')}">${data.measurements||''}</p></div></div><p class="label-asset-number">${data.assetNumber||''}</p>`;
         livePreview.insertAdjacentHTML('beforeend', textContentHTML);
 
         if (stagedDecorationType === 'neutral' && stagedNeutralLogo) {
@@ -1075,6 +1102,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     state = importedState;
                     if (!state.styleConfig) {
                         state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+                    } else {
+                        if (!state.styleConfig.fontFamily) state.styleConfig.fontFamily = DEFAULT_STYLE_CONFIG.fontFamily;
+                        if (state.styleConfig.baseFontSize === undefined) state.styleConfig.baseFontSize = DEFAULT_STYLE_CONFIG.baseFontSize;
                     }
                     saveState();
                     renderUI();
@@ -1242,12 +1272,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
             
-            doc.setFont('arial'); doc.setTextColor(0, 0, 0);
-
             // --- CONFIGURACIÓN DE ESTILO DINÁMICA (MODO PRO / WYSIWYG 1:1) ---
             const styleConfig = state.styleConfig || DEFAULT_STYLE_CONFIG;
             const textAlign = styleConfig.textAlign || 'center';
             const lineSpacing = styleConfig.lineSpacingMultiplier !== undefined ? styleConfig.lineSpacingMultiplier : 1.0;
+            const pdfFontKey = styleConfig.fontFamily || 'arial';
+            const pdfFontName = (FONT_MAP[pdfFontKey] && FONT_MAP[pdfFontKey].pdf) || 'arial';
+            
+            doc.setFont(pdfFontName, 'normal'); doc.setTextColor(0, 0, 0);
             const fieldsMap = (styleConfig.fields || DEFAULT_STYLE_CONFIG.fields).reduce((acc, f) => {
                 acc[f.id] = f;
                 return acc;
@@ -1295,7 +1327,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const availableHeight = labelH_mm - (type === 'arabesque' ? (decoHeightFallback * 2) + 10 : 20);
 
             const minFontSize = 6;
-            let currentFontSize = 12;
+            const initialFontSize = (typeof styleConfig.baseFontSize === 'number') ? styleConfig.baseFontSize : 12;
+            let currentFontSize = initialFontSize;
             let fitted = false;
             let authorLines = [], titleLines = [], dateLines = [], techLines = [], measLines = [];
             let lineHeight;
@@ -1304,15 +1337,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setFontSize(currentFontSize);
                 lineHeight = currentFontSize * 0.3527 * 1.2 * lineSpacing; 
                 
-                doc.setFont('arial', authorStyle);
+                doc.setFont(pdfFontName, authorStyle);
                 authorLines = (isFieldVisible('author') && label.author) ? doc.splitTextToSize(label.author, maxWidth) : [];
-                doc.setFont('arial', titleStyle);
+                doc.setFont(pdfFontName, titleStyle);
                 titleLines = (isFieldVisible('title') && label.title) ? doc.splitTextToSize(label.title, maxWidth) : [];
-                doc.setFont('arial', dateStyle);
+                doc.setFont(pdfFontName, dateStyle);
                 dateLines = (isFieldVisible('date') && label.date) ? doc.splitTextToSize(label.date, maxWidth) : [];
-                doc.setFont('arial', techStyle);
+                doc.setFont(pdfFontName, techStyle);
                 techLines = (isFieldVisible('technique') && label.technique) ? doc.splitTextToSize(label.technique, maxWidth) : [];
-                doc.setFont('arial', measStyle);
+                doc.setFont(pdfFontName, measStyle);
                 measLines = (isFieldVisible('measurements') && label.measurements) ? doc.splitTextToSize(label.measurements, maxWidth) : [];
                 
                 const totalLines = authorLines.length + titleLines.length + dateLines.length + techLines.length + measLines.length;
@@ -1331,31 +1364,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const padding = Math.max(1, currentFontSize / 12 * 2) * lineSpacing;
 
             if (authorLines.length > 0) {
-                doc.setFont('arial', authorStyle);
+                doc.setFont(pdfFontName, authorStyle);
                 doc.text(authorLines, textX, textY, textOptions);
                 textY += (authorLines.length * lineHeight) + padding;
             }
 
             if (titleLines.length > 0) {
-                doc.setFont('arial', titleStyle);
+                doc.setFont(pdfFontName, titleStyle);
                 doc.text(titleLines, textX, textY, textOptions);
                 textY += (titleLines.length * lineHeight) + padding;
             }
 
             if (dateLines.length > 0) {
-                doc.setFont('arial', dateStyle);
+                doc.setFont(pdfFontName, dateStyle);
                 doc.text(dateLines, textX, textY, textOptions);
                 textY += (dateLines.length * lineHeight) + padding;
             }
 
             if (techLines.length > 0) {
-                doc.setFont('arial', techStyle);
+                doc.setFont(pdfFontName, techStyle);
                 doc.text(techLines, textX, textY, textOptions);
                 textY += (techLines.length * lineHeight) + padding;
             }
 
             if (measLines.length > 0) {
-                doc.setFont('arial', measStyle);
+                doc.setFont(pdfFontName, measStyle);
                 doc.text(measLines, textX, textY, textOptions);
             }
             // --- FIN DE LA CORRECCIÓN AUTO-SHRINK ---
@@ -1416,6 +1449,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- GESTIÓN DE CONFIGURACIÓN DE ESTILO (MODO PRO / STYLE ENGINE) ---
     const styleAccordionBtn = document.getElementById('style-accordion-btn');
     const styleAccordion = document.querySelector('.style-accordion');
+    const styleFontFamilySelect = document.getElementById('style-font-family');
+    const styleFontSizeSlider = document.getElementById('style-font-size-slider');
+    const fontSizeIndicator = document.getElementById('font-size-indicator');
     const styleAlignButtons = document.querySelectorAll('.style-align-btn');
     const lineSpacingSlider = document.getElementById('line-spacing-slider');
     const lineSpacingValue = document.getElementById('line-spacing-value');
@@ -1430,7 +1466,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncStyleControlsUI = () => {
         const cfg = state.styleConfig || DEFAULT_STYLE_CONFIG;
 
-        // 1. Sincronizar alineación
+        // 1. Sincronizar selector tipográfico y tamaño base
+        if (styleFontFamilySelect) {
+            styleFontFamilySelect.value = cfg.fontFamily || DEFAULT_STYLE_CONFIG.fontFamily;
+        }
+        const baseFontSize = (typeof cfg.baseFontSize === 'number') ? cfg.baseFontSize : DEFAULT_STYLE_CONFIG.baseFontSize;
+        if (styleFontSizeSlider) {
+            styleFontSizeSlider.value = baseFontSize;
+        }
+        if (fontSizeIndicator) {
+            fontSizeIndicator.textContent = `${baseFontSize} pt`;
+        }
+
+        // 2. Sincronizar alineación
         const currentAlign = cfg.textAlign || 'center';
         styleAlignButtons.forEach(btn => {
             if (btn.dataset.align === currentAlign) {
@@ -1440,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 2. Sincronizar botones de formato de cada campo
+        // 3. Sincronizar botones de formato de cada campo
         const fieldsMap = (cfg.fields || DEFAULT_STYLE_CONFIG.fields).reduce((acc, f) => {
             acc[f.id] = f;
             return acc;
@@ -1463,11 +1511,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 3. Sincronizar interlineado
+        // 4. Sincronizar interlineado
         const spacing = cfg.lineSpacingMultiplier !== undefined ? cfg.lineSpacingMultiplier : 1.0;
         if (lineSpacingSlider) lineSpacingSlider.value = spacing;
         if (lineSpacingValue) lineSpacingValue.textContent = `${parseFloat(spacing).toFixed(1)}x`;
     };
+
+    // Eventos de selección de tipografía
+    if (styleFontFamilySelect) {
+        styleFontFamilySelect.addEventListener('change', (e) => {
+            if (!state.styleConfig) {
+                state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+            }
+            state.styleConfig.fontFamily = e.target.value;
+            saveState();
+            renderLivePreview();
+        });
+    }
+
+    // Eventos de control de tamaño base de fuente
+    if (styleFontSizeSlider) {
+        styleFontSizeSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value, 10);
+            if (!state.styleConfig) {
+                state.styleConfig = JSON.parse(JSON.stringify(DEFAULT_STYLE_CONFIG));
+            }
+            state.styleConfig.baseFontSize = val;
+            if (fontSizeIndicator) fontSizeIndicator.textContent = `${val} pt`;
+            saveState();
+            renderLivePreview();
+        });
+    }
 
     // Eventos de alineación
     styleAlignButtons.forEach(btn => {
