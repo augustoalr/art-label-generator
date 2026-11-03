@@ -137,6 +137,23 @@
                     </button>
                     <div class="style-accordion-content" id="style-accordion-content">
                         <div class="style-group">
+                            <label for="style-font-family" class="style-group-label">Tipografía y Fuente</label>
+                            <select id="style-font-family" class="style-select">
+                                <option value="arial">Sans-Serif Moderna (Arial / Helvetica)</option>
+                                <option value="times">Serif Clásica de Museo (Times / Garamond)</option>
+                                <option value="courier">Monospace Técnica (Courier)</option>
+                            </select>
+                        </div>
+
+                        <div class="style-group">
+                            <div class="spacing-header">
+                                <label for="style-font-size-slider" class="style-group-label" style="margin-bottom: 0;">Tamaño de Fuente Base</label>
+                                <span id="font-size-indicator" class="spacing-indicator">12 pt</span>
+                            </div>
+                            <input type="range" id="style-font-size-slider" class="style-slider" min="8" max="16" step="1" value="12">
+                        </div>
+
+                        <div class="style-group">
                             <label class="style-group-label">Alineación de Texto</label>
                             <div class="style-alignment-buttons" role="group" aria-label="Alineación">
                                 <button type="button" class="style-align-btn" data-align="left" title="Alinear a la izquierda">

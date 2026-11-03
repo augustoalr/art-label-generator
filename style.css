@@ -1703,3 +1703,28 @@ header h1 i {
     color: var(--danger-color);
     background-color: var(--danger-subtle);
 }
+
+.style-select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: var(--text-color);
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    outline: none;
+}
+
+.style-select:hover {
+    border-color: #cbd5e1;
+}
+
+.style-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.15);
+}
+
