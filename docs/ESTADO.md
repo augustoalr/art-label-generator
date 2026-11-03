@@ -28,7 +28,14 @@
    - Control de interlineado continuo (0.8x a 2.0x) con cálculo dinámico de espaciado en pantalla e impresión.
    - Sincronización en tiempo real entre pantalla y exportación de PDF (`jsPDF`).
    - Retrocompatibilidad asegurada con proyectos `.artlabel` existentes.
-5. **Pantalla de Bloqueo por PIN**:
+5. **Rediseño UI/UX y Sistema de Tokens Moderno (Museum Studio)**:
+   - Paleta contemporánea basada en tonos pizarra/índigo (`--primary-color: #1e293b`, `--accent-color: #2563eb`).
+   - Tarjetas con sombras de elevación difusas multicapa (`--shadow-sm` a `--shadow-xl`).
+   - Inputs con focus rings accesibles (`box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15)`).
+   - Botón primario de PDF destacado con gradiente de alta visibilidad.
+   - Micro-interacciones táctiles en botones y controles segmentados.
+   - Modales con fondo desenfocado (`backdrop-filter: blur(8px)`).
+6. **Pantalla de Bloqueo por PIN**:
    - Modal de seguridad inicial (PIN por defecto: `1234`).
 2. **Generación y Gestión de Rótulos**:
    - Búsqueda por número de inventario / Id number sobre `data.json`.

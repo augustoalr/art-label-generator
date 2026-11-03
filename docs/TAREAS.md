@@ -98,3 +98,17 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
 - **Criterios de Aceptación**:
   - Documentación clara y precisa del flujo de trabajo, compatibilidad y atajos.
 - **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-009] Rediseño Moderno UI/UX y Sistema de Tokens de Galería
+- **ID**: `TASK-009`
+- **Objetivo**: Modernizar integralmente la experiencia visual y estética de la interfaz (header editorial, tarjetas con elevación sutil, inputs modernos con focus rings elegantes, botones de acción jerarquizados, badges limpios y transiciones suaves), respetando el flujo de trabajo existente.
+- **Archivos que toca**: `style.css`, `index.html`
+- **Criterios de Aceptación**:
+  - Paleta y tokens semánticos renovados con estética de estudio de arte/museo moderno.
+  - Header estilizado con acciones bien jerarquizadas (primaria, secundaria, peligro).
+  - Formularios e inputs con micro-interacciones pulidas y mejor feedback táctil/visual.
+  - Sin roturas en el canvas de previsualización 1:1, drag & drop de logo ni generación de PDF.
+  - Verificación `node test-syntax.js` con código 0.
+- **Estado**: Completada (Merged a main)
