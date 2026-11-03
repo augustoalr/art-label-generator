@@ -112,3 +112,18 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - Sin roturas en el canvas de previsualización 1:1, drag & drop de logo ni generación de PDF.
   - Verificación `node test-syntax.js` con código 0.
 - **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-010] Selector de Tipografía y Escala de Tamaño de Fuente en Gallery Style (Modo Pro)
+- **ID**: `TASK-010`
+- **Objetivo**: Añadir en el panel "Gallery Style (Pro Mode)" controles para seleccionar la familia tipográfica (fuentes museo/galería: Sans-Serif moderna, Serif clásica editorial, Monospace técnica, etc.) y un control de tamaño base de fuente (ej. de 8pt a 16pt / multiplicador de escala), sincronizándolo reactivamente con la previsualización en vivo (CSS) y el renderizado en PDF (`jsPDF`).
+- **Archivos que toca**: `index.html`, `style.css`, `script.js`
+- **Criterios de Aceptación**:
+  - Selector visual de fuentes compatibles tanto en navegador como en jsPDF estándar (Helvetica/Arial, Times New Roman, Courier) y webfonts editoriales (Roboto, Georgia / Serif).
+  - Control de tamaño de fuente base / escala con indicador numérico.
+  - Actualización en vivo en `#live-preview` (WYSIWYG 1:1).
+  - Integración en `generatePDF()` mapeando la familia y tamaño de fuente exactos en `doc.setFont()` y `doc.setFontSize()`.
+  - Persistencia en `localStorage` mediante `state.styleConfig.fontFamily` y `state.styleConfig.fontSize`.
+  - Verificación estática con `node test-syntax.js` con código 0.
+- **Estado**: Completada (Merged a main)

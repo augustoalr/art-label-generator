@@ -23,6 +23,8 @@
    - Soporte UMD (compatible con navegador y testing en Node.js).
 4. **Motor de Estilos de Galería (Modo Pro v7.0 - UI y PDF WYSIWYG 1:1)**:
    - Panel interactivo colapsable "Gallery Style (Pro Mode)".
+   - **Selector de Tipografía**: Sans-Serif Moderna (Arial / Helvetica), Serif Clásica de Museo (Times / Garamond), Monospace Técnica (Courier).
+   - **Control de Tamaño Base**: Slider continuo de 8 pt a 16 pt con indicador numérico interactivo.
    - Alineación configurable: Izquierda, Centro, Derecha (sincronizada en Live Preview y jsPDF).
    - Toggles independientes de Negrita (**B**) y Cursiva (*I*) por cada campo (`author`, `title`, `date`, `technique`, `measurements`).
    - Control de interlineado continuo (0.8x a 2.0x) con cálculo dinámico de espaciado en pantalla e impresión.
