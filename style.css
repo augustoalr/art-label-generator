@@ -559,6 +559,11 @@ header h1 i {
     z-index: 10;
 }
 
+.image-wrapper.edge-clamped {
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 0 1px #e74c3c;
+}
+
 .resize-handle {
     position: absolute;
     bottom: -10px;
