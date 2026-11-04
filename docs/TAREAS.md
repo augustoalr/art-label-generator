@@ -142,3 +142,32 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - Compatibilidad total con proyectos existentes.
   - Verificación estática con `node test-syntax.js` con código 0.
 - **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-012] Reorganización de Layout en 3 Columnas con Vista Previa Sticky Siempre Visible
+- **ID**: `TASK-012`
+- **Objetivo**: Reestructurar el layout de la app a una arquitectura de 3 columnas (Columna 1: Datos y Formulario; Columna 2: Estilos, Tipografía y Decoración; Columna 3: Vista Previa Flotante / Sticky fija) para que el usuario observe los cambios en vivo sin hacer scroll vertical hacia arriba y abajo.
+- **Archivos que toca**: `index.html`, `style.css`
+- **Criterios de Aceptación**:
+  - Columna 1 izquierda: Formulario de creación/edición de datos de obra.
+  - Columna 2 centro: Controles de estilo de galería (Modo Pro), selección de fuentes, sliders y decoraciones/imágenes.
+  - Columna 3 derecha: `#live-preview-container` y controles de dimensión/guías con comportamiento `sticky` (`top: 1.5rem`), siempre visible en pantalla.
+  - Responsividad: en pantallas medianas o móviles se apila ordenadamente con fluidez.
+  - Preservación íntegra de IDs y selectores requeridos por `script.js`.
+  - Verificación estática con `node test-syntax.js` con código 0.
+- **Estado**: En progreso (Reasignada a subagente Lead UX/UI Designer)
+
+---
+
+### [TASK-013] Módulo de Importación Amigable sin JSON (Excel / CSV / Direct Paste)
+- **ID**: `TASK-013`
+- **Objetivo**: Implementar `js/catalog-importer.js` y el modal asistente para que el usuario pueda importar colecciones mediante copia y pega directo de Excel/Sheets (`Ctrl+V`) o subida de archivos `.csv` / `.xlsx`, con detección inteligente de columnas y plantilla descargable.
+- **Archivos que toca**: `js/catalog-importer.js` (nuevo), `plantilla-obras.csv` (nuevo), `index.html`, `script.js`, `style.css`
+- **Criterios de Aceptación**:
+  - Pestaña de pegado directo de Excel que previsualiza las obras antes de confirmar.
+  - Soporte de subida para archivos `.csv`.
+  - Mapeo automático de sinónimos de columnas (Autor, Título, etc.).
+  - Plantilla CSV descargable desde la UI.
+  - Verificación estática con `node test-syntax.js` con código 0.
+- **Estado**: En cola (Plan aprobado por usuario)
