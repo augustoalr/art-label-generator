@@ -1752,3 +1752,353 @@ header h1 i {
     box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.15);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IMPORT WIZARD MODAL — TASK-013
+   Asistente de Importación Masiva sin JSON
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.import-wizard-content {
+    max-width: 760px;
+    width: 95vw;
+}
+
+/* ─── Trigger Button ────────────────────────────────────────────────────── */
+.import-wizard-trigger {
+    background-color: var(--accent-subtle, rgba(99, 102, 241, 0.1));
+    color: var(--accent-color);
+    border-color: rgba(99, 102, 241, 0.3);
+    font-weight: 600;
+}
+
+.import-wizard-trigger:hover {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border-color: var(--accent-color);
+}
+
+/* ─── Wizard Tabs ───────────────────────────────────────────────────────── */
+.wizard-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.25rem;
+}
+
+.wizard-tab {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary-color, #94a3b8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.wizard-tab:hover {
+    color: var(--text-color);
+    background-color: var(--hover-bg, rgba(255,255,255,0.03));
+}
+
+.wizard-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* ─── Tab Panels ────────────────────────────────────────────────────────── */
+.wizard-instructions {
+    background-color: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.wizard-instructions p {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.875rem;
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+.wizard-instructions p:last-child {
+    margin-bottom: 0;
+}
+
+.wizard-hint {
+    color: var(--text-secondary-color, #94a3b8);
+    font-size: 0.82rem !important;
+}
+
+kbd {
+    background: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.8em;
+    font-family: monospace;
+    color: var(--accent-color);
+}
+
+/* ─── Paste Area ────────────────────────────────────────────────────────── */
+.wizard-paste-area {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 160px;
+    padding: 0.85rem;
+    background-color: var(--input-bg, var(--card-background));
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 0.85rem;
+}
+
+.wizard-paste-area:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    border-style: solid;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ─── File Drop Zone ────────────────────────────────────────────────────── */
+.wizard-file-drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.wizard-file-drop-zone:hover,
+.wizard-file-drop-zone.drag-over {
+    border-color: var(--accent-color);
+    background-color: rgba(99, 102, 241, 0.05);
+}
+
+.wizard-file-drop-zone i {
+    font-size: 2.5rem;
+    color: var(--text-secondary-color, #94a3b8);
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.wizard-file-drop-zone p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.wizard-template-link {
+    font-size: 0.85rem;
+    color: var(--text-secondary-color, #94a3b8);
+    margin-top: 0.75rem;
+}
+
+.wizard-template-link a {
+    color: var(--accent-color);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* ─── Action Buttons ────────────────────────────────────────────────────── */
+.wizard-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wizard-action-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+/* ─── Preview Area ──────────────────────────────────────────────────────── */
+.wizard-preview-area {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.25rem;
+}
+
+.wizard-mapping-info {
+    background-color: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.85rem;
+    font-size: 0.82rem;
+    color: var(--text-color);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+}
+
+.wizard-mapping-info:empty {
+    display: none;
+}
+
+.wizard-mapping-tag {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border-radius: 4px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.wizard-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.wizard-preview-badge {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border-radius: 9999px;
+    padding: 0.2rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.wizard-preview-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary-color, #94a3b8);
+    font-style: italic;
+}
+
+.wizard-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.85rem;
+}
+
+.wizard-preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.wizard-preview-table th {
+    background-color: var(--accent-subtle, rgba(99, 102, 241, 0.1));
+    color: var(--accent-color);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.wizard-preview-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wizard-preview-table tr:last-child td {
+    border-bottom: none;
+}
+
+.wizard-preview-table tr:hover td {
+    background-color: rgba(99, 102, 241, 0.04);
+}
+
+/* ─── Warnings ──────────────────────────────────────────────────────────── */
+.wizard-warnings {
+    background-color: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--border-radius-sm);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.83rem;
+    color: #d97706;
+    margin-bottom: 0.85rem;
+}
+
+.wizard-warnings ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+/* ─── Import Action Buttons ─────────────────────────────────────────────── */
+.wizard-import-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.wizard-confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.4rem;
+    background-color: var(--success-color, #10b981);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wizard-confirm-btn:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.wizard-confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.wizard-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: none;
+    color: var(--text-secondary-color, #94a3b8);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wizard-clear-btn:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    background-color: var(--danger-subtle, rgba(225, 29, 72, 0.06));
+}

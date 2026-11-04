@@ -1049,16 +1049,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('date').value = artData.date || '';
         document.getElementById('technique').value = artData.technique || '';
         document.getElementById('measurements').value = artData.measurements || '';
-        document.getElementById('asset-number').value = artData.asset_number || '';
+        document.getElementById('asset-number').value = artData.asset_number || artData.id || '';
         renderLivePreview();
     };
 
     const findArtInCatalog = (catalogList, targetAssetNumber) => {
         if (!Array.isArray(catalogList) || catalogList.length === 0) return null;
+        const normalizedTarget = String(targetAssetNumber).trim().toLowerCase();
         return catalogList.find(item => {
-            if (!item || item.asset_number === undefined || item.asset_number === null) return false;
-            const assetNumbers = String(item.asset_number).split('/');
-            return assetNumbers.includes(targetAssetNumber);
+            if (!item) return false;
+            const rawAsset = item.asset_number !== undefined ? item.asset_number : item.id;
+            if (rawAsset === undefined || rawAsset === null) return false;
+            const assetNumbers = String(rawAsset).split('/');
+            return assetNumbers.some(n => n.trim().toLowerCase() === normalizedTarget);
         }) || null;
     };
 
@@ -1141,38 +1144,287 @@ document.addEventListener('DOMContentLoaded', () => {
 
     importProjectBtn.addEventListener('click', () => importProjectInput.click());
 
-    // --- IMPORTACIÓN DE CATÁLOGO ---
-    if (importCatalogBtn && importCatalogInput) {
-        importCatalogBtn.addEventListener('click', () => importCatalogInput.click());
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ASISTENTE DE IMPORTACIÓN MASIVA (TASK-013)
+    // ═══════════════════════════════════════════════════════════════════════════
+    const openImportWizardBtn = document.getElementById('open-import-wizard-btn');
+    const importWizardModal = document.getElementById('import-wizard-modal');
+    const importWizardCloseBtn = document.getElementById('import-wizard-close-btn');
+    const wizardTabs = document.querySelectorAll('.wizard-tab');
+    const wizardTabPaste = document.getElementById('wizard-tab-paste');
+    const wizardTabFile = document.getElementById('wizard-tab-file');
+    const wizardPasteArea = document.getElementById('wizard-paste-area');
+    const wizardDetectBtn = document.getElementById('wizard-detect-btn');
+    const wizardFileDropZone = document.getElementById('wizard-file-drop-zone');
+    const wizardFileInput = document.getElementById('wizard-file-input');
+    const wizardBrowseBtn = document.getElementById('wizard-browse-btn');
+    const wizardPreviewArea = document.getElementById('wizard-preview-area');
+    const wizardMappingInfo = document.getElementById('wizard-mapping-info');
+    const wizardPreviewCount = document.getElementById('wizard-preview-count');
+    const wizardPreviewThead = document.getElementById('wizard-preview-thead');
+    const wizardPreviewTbody = document.getElementById('wizard-preview-tbody');
+    const wizardWarnings = document.getElementById('wizard-warnings');
+    const wizardConfirmBtn = document.getElementById('wizard-confirm-btn');
+    const wizardConfirmLabel = document.getElementById('wizard-confirm-label');
+    const wizardClearBtn = document.getElementById('wizard-clear-btn');
 
-        importCatalogInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+    let wizardParsedData = null;
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const parsedData = JSON.parse(event.target.result);
-                    if (!Array.isArray(parsedData)) {
-                        alert('El archivo no contiene un catálogo válido (debe ser un array de obras en formato JSON).');
-                        return;
-                    }
+    const escapeHtml = (text) => {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    };
 
-                    const validItems = parsedData.filter(item => item && typeof item === 'object' && item.asset_number !== undefined && item.asset_number !== null && String(item.asset_number).trim() !== '');
-                    if (validItems.length === 0) {
-                        alert('No se encontraron obras válidas con "asset_number" en el archivo proporcionado.');
-                        return;
-                    }
+    const resetWizardUI = () => {
+        wizardParsedData = null;
+        if (wizardPasteArea) wizardPasteArea.value = '';
+        if (wizardFileInput) wizardFileInput.value = '';
+        if (wizardPreviewArea) wizardPreviewArea.style.display = 'none';
+        if (wizardMappingInfo) wizardMappingInfo.innerHTML = '';
+        if (wizardPreviewThead) wizardPreviewThead.innerHTML = '';
+        if (wizardPreviewTbody) wizardPreviewTbody.innerHTML = '';
+        if (wizardWarnings) {
+            wizardWarnings.style.display = 'none';
+            wizardWarnings.innerHTML = '';
+        }
+    };
 
-                    saveCatalog(validItems);
-                    alert(`Catálogo cargado con ${validItems.length} obras.`);
-                } catch (err) {
-                    console.error('Error al parsear el archivo de catálogo:', err);
-                    alert('Error al leer el archivo JSON de catálogo. Verifica que el formato sea correcto.');
+    const closeImportWizard = () => {
+        if (importWizardModal) importWizardModal.style.display = 'none';
+        resetWizardUI();
+    };
+
+    const openImportWizard = () => {
+        if (importWizardModal) {
+            resetWizardUI();
+            importWizardModal.style.display = 'flex';
+            if (wizardTabs.length > 0) wizardTabs[0].click();
+        }
+    };
+
+    if (openImportWizardBtn) {
+        openImportWizardBtn.addEventListener('click', openImportWizard);
+    }
+
+    if (importWizardCloseBtn) {
+        importWizardCloseBtn.addEventListener('click', closeImportWizard);
+    }
+
+    if (importWizardModal) {
+        importWizardModal.addEventListener('click', (e) => {
+            if (e.target === importWizardModal) closeImportWizard();
+        });
+    }
+
+    // Tabs switching
+    wizardTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            wizardTabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+
+            const tabName = tab.dataset.tab;
+            if (tabName === 'paste') {
+                if (wizardTabPaste) wizardTabPaste.style.display = 'block';
+                if (wizardTabFile) wizardTabFile.style.display = 'none';
+                if (wizardPasteArea) wizardPasteArea.focus();
+            } else if (tabName === 'file') {
+                if (wizardTabPaste) wizardTabPaste.style.display = 'none';
+                if (wizardTabFile) wizardTabFile.style.display = 'block';
+            }
+        });
+    });
+
+    const displayWizardPreview = (parseResult) => {
+        if (!parseResult || !parseResult.artLabels || parseResult.artLabels.length === 0) {
+            if (wizardPreviewArea) wizardPreviewArea.style.display = 'block';
+            if (wizardPreviewCount) wizardPreviewCount.textContent = '0 obras detectadas';
+            if (wizardConfirmLabel) wizardConfirmLabel.textContent = 'Confirmar e Importar';
+            if (wizardConfirmBtn) wizardConfirmBtn.disabled = true;
+            if (wizardMappingInfo) wizardMappingInfo.innerHTML = '';
+            if (wizardPreviewThead) wizardPreviewThead.innerHTML = '';
+            if (wizardPreviewTbody) wizardPreviewTbody.innerHTML = '';
+            if (wizardWarnings) {
+                wizardWarnings.style.display = 'block';
+                wizardWarnings.innerHTML = '<p><i class="fas fa-exclamation-triangle"></i> No se encontraron obras válidas en los datos proporcionados.</p>';
+            }
+            return;
+        }
+
+        wizardParsedData = parseResult.artLabels;
+        if (wizardPreviewArea) wizardPreviewArea.style.display = 'block';
+        if (wizardConfirmBtn) wizardConfirmBtn.disabled = false;
+
+        const count = wizardParsedData.length;
+        if (wizardPreviewCount) {
+            wizardPreviewCount.textContent = `${count} obra${count === 1 ? '' : 's'} detectada${count === 1 ? '' : 's'}`;
+        }
+        if (wizardConfirmLabel) {
+            wizardConfirmLabel.textContent = `Confirmar e Importar ${count} Obra${count === 1 ? '' : 's'}`;
+        }
+
+        // Render Mappings
+        if (wizardMappingInfo) {
+            wizardMappingInfo.innerHTML = '';
+            if (parseResult.isJson) {
+                wizardMappingInfo.innerHTML = '<span class="wizard-mapping-tag"><i class="fas fa-check"></i> Catálogo JSON estándar</span>';
+            } else if (parseResult.headers && parseResult.columnMapping && typeof CatalogImporter !== 'undefined') {
+                const descriptions = CatalogImporter.describeMappings(parseResult.headers, parseResult.columnMapping);
+                if (descriptions.length > 0) {
+                    descriptions.forEach(desc => {
+                        const tag = document.createElement('span');
+                        tag.className = 'wizard-mapping-tag';
+                        tag.innerHTML = `<i class="fas fa-check"></i> ${escapeHtml(desc)}`;
+                        wizardMappingInfo.appendChild(tag);
+                    });
                 }
-            };
-            reader.readAsText(file);
-            importCatalogInput.value = '';
+            }
+        }
+
+        // Render Warnings
+        if (wizardWarnings) {
+            if (parseResult.warnings && parseResult.warnings.length > 0) {
+                wizardWarnings.style.display = 'block';
+                wizardWarnings.innerHTML = `<ul>${parseResult.warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>`;
+            } else {
+                wizardWarnings.style.display = 'none';
+                wizardWarnings.innerHTML = '';
+            }
+        }
+
+        // Render Preview Table (up to 3 rows)
+        if (wizardPreviewThead && wizardPreviewTbody) {
+            wizardPreviewThead.innerHTML = `
+                <tr>
+                    <th>Nro. Bien</th>
+                    <th>Autor</th>
+                    <th>Título</th>
+                    <th>Fecha</th>
+                    <th>Técnica</th>
+                    <th>Medidas</th>
+                </tr>
+            `;
+
+            const previewItems = wizardParsedData.slice(0, 3);
+            wizardPreviewTbody.innerHTML = previewItems.map(item => `
+                <tr>
+                    <td><strong>${escapeHtml(item.asset_number || item.id || '-')}</strong></td>
+                    <td>${escapeHtml(item.author || '-')}</td>
+                    <td><em>${escapeHtml(item.title || '-')}</em></td>
+                    <td>${escapeHtml(item.date || '-')}</td>
+                    <td>${escapeHtml(item.technique || '-')}</td>
+                    <td>${escapeHtml(item.measurements || '-')}</td>
+                </tr>
+            `).join('');
+        }
+    };
+
+    // Tab 1: Parse Paste Text
+    const processPasteText = () => {
+        if (!wizardPasteArea) return;
+        const text = wizardPasteArea.value;
+        if (!text.trim()) {
+            alert('Por favor pega texto copiado de Excel o una tabla antes de detectar.');
+            return;
+        }
+
+        if (typeof CatalogImporter === 'undefined') {
+            alert('Error: el módulo CatalogImporter no está cargado.');
+            return;
+        }
+
+        const result = CatalogImporter.parseText(text);
+        displayWizardPreview(result);
+    };
+
+    if (wizardDetectBtn) {
+        wizardDetectBtn.addEventListener('click', processPasteText);
+    }
+
+    if (wizardPasteArea) {
+        wizardPasteArea.addEventListener('paste', () => {
+            setTimeout(processPasteText, 100);
+        });
+    }
+
+    // Tab 2: File Handling
+    if (wizardBrowseBtn && wizardFileInput) {
+        wizardBrowseBtn.addEventListener('click', () => wizardFileInput.click());
+    }
+
+    const handleFileSelected = (file) => {
+        if (!file) return;
+        if (typeof CatalogImporter === 'undefined') {
+            alert('Error: el módulo CatalogImporter no está cargado.');
+            return;
+        }
+
+        CatalogImporter.parseFile(file)
+            .then(result => {
+                displayWizardPreview(result);
+            })
+            .catch(err => {
+                alert(err.message || 'Error al procesar el archivo.');
+            });
+    };
+
+    if (wizardFileInput) {
+        wizardFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFileSelected(file);
+        });
+    }
+
+    if (wizardFileDropZone) {
+        wizardFileDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            wizardFileDropZone.classList.add('drag-over');
+        });
+
+        wizardFileDropZone.addEventListener('dragleave', () => {
+            wizardFileDropZone.classList.remove('drag-over');
+        });
+
+        wizardFileDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            wizardFileDropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFileSelected(file);
+        });
+    }
+
+    // Clear Button
+    if (wizardClearBtn) {
+        wizardClearBtn.addEventListener('click', resetWizardUI);
+    }
+
+    // Confirm Import Button
+    if (wizardConfirmBtn) {
+        wizardConfirmBtn.addEventListener('click', () => {
+            if (!wizardParsedData || wizardParsedData.length === 0) {
+                alert('No hay obras para importar.');
+                return;
+            }
+
+            const count = wizardParsedData.length;
+            const normalizedCatalog = wizardParsedData.map(item => {
+                const assetNum = item.asset_number || item.id || `OBR-${Date.now()}`;
+                return {
+                    ...item,
+                    id: item.id || assetNum,
+                    asset_number: assetNum
+                };
+            });
+
+            saveCatalog(normalizedCatalog);
+            closeImportWizard();
+
+            alert(`¡Éxito! Se han importado ${count} obra${count === 1 ? '' : 's'} a tu catálogo.\n\nPuedes autocompletar cualquier rótulo escribiendo su Número de Bien en el formulario de creación.`);
         });
     }
 

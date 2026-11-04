@@ -79,3 +79,9 @@
    - Requerimiento de personalizar orden de campos, estilos (negrita/cursiva/alineación) e interlineado por campo sin alterar la base de datos de texto plano.
 3. **Validación Automatizada**:
    - Ausencia de tests unitarios o e2e automatizados para asegurar no-regresión en la exportación de PDF y cálculos de grilla.
+
+
+## Actualización V7.1 — Importación Masiva Amigable (TASK-013) y Layout 3 Columnas (TASK-012)
+- **Layout 3 columnas**: Panel de edición (col 1), Diseño y Pro Mode (col 2), y Vista Previa Sticky fija (col 3).
+- **Asistente de Importación**: Cero fricción con JSON. Copiar y pegar directo desde Excel/Sheets (Ctrl+V) o subir archivos .csv con detección inteligente de columnas por sinónimos.
+- **Plantilla**: 'plantilla-obras.csv' lista para descargar y usar.
