@@ -156,7 +156,7 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - Responsividad: en pantallas medianas o móviles se apila ordenadamente con fluidez.
   - Preservación íntegra de IDs y selectores requeridos por `script.js`.
   - Verificación estática con `node test-syntax.js` con código 0.
-- **Estado**: En progreso (Reasignada a subagente Lead UX/UI Designer)
+- **Estado**: Completada (Merged a main)
 
 ---
 
@@ -170,4 +170,4 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - Mapeo automático de sinónimos de columnas (Autor, Título, etc.).
   - Plantilla CSV descargable desde la UI.
   - Verificación estática con `node test-syntax.js` con código 0.
-- **Estado**: En cola (Plan aprobado por usuario)
+- **Estado**: Completada (Merged a main)

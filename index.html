@@ -37,9 +37,9 @@
                         <div class="label-header-row">
                             <label for="asset-number" style="margin-bottom: 0;">Id number</label>
                             <div class="catalog-actions-inline">
-                                <input type="file" id="import-catalog-input" accept=".json" style="display: none;">
-                                <button type="button" id="import-catalog-btn" class="catalog-btn" title="Cargar archivo .json con catálogo de obras"><i class="fas fa-file-import"></i> Import Catalog</button>
-                                <a href="ejemplo-catalogo.json" download="ejemplo-catalogo.json" class="catalog-link" title="Descargar plantilla de ejemplo JSON"><i class="fas fa-file-download"></i> Plantilla</a>
+                                <button type="button" id="open-import-wizard-btn" class="catalog-btn import-wizard-trigger" title="Importar catálogo desde Excel, CSV o JSON">
+                                    <i class="fas fa-magic"></i> Importar Catálogo
+                                </button>
                             </div>
                         </div>
                         <div class="catalog-status" id="catalog-status">Catálogo: No cargado</div>
@@ -288,7 +288,89 @@
         </div>
     </div>
 
-    <div id="pin-modal-overlay" class="pin-modal-overlay">
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: ASISTENTE DE IMPORTACIÓN MASIVA (TASK-013)
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="import-wizard-modal" class="modal" aria-modal="true" role="dialog" aria-labelledby="import-wizard-title">
+        <div class="modal-content import-wizard-content">
+            <div class="modal-header">
+                <h2 id="import-wizard-title"><i class="fas fa-magic"></i> Asistente de Importación de Catálogo</h2>
+                <button class="close-modal-btn" id="import-wizard-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+
+                <!-- TABS -->
+                <div class="wizard-tabs" role="tablist">
+                    <button class="wizard-tab active" data-tab="paste" role="tab" aria-selected="true">
+                        <i class="fas fa-clipboard"></i> Pegar desde Excel
+                    </button>
+                    <button class="wizard-tab" data-tab="file" role="tab" aria-selected="false">
+                        <i class="fas fa-file-upload"></i> Subir Archivo
+                    </button>
+                </div>
+
+                <!-- TAB 1: PASTE FROM EXCEL -->
+                <div id="wizard-tab-paste" class="wizard-tab-panel active">
+                    <div class="wizard-instructions">
+                        <p><i class="fas fa-info-circle"></i> <strong>¿Cómo usar?</strong> Selecciona las filas en Excel o Google Sheets, copia con <kbd>Ctrl+C</kbd> y pega aquí con <kbd>Ctrl+V</kbd>.</p>
+                        <p class="wizard-hint">La primera fila debe contener los encabezados: <em>Autor, Título, Fecha, Técnica, Medidas, etc.</em></p>
+                    </div>
+                    <textarea id="wizard-paste-area" class="wizard-paste-area" placeholder="Pega aquí el contenido copiado de Excel o Google Sheets (Ctrl+V)..." rows="8" spellcheck="false"></textarea>
+                    <button type="button" id="wizard-detect-btn" class="wizard-action-btn">
+                        <i class="fas fa-search"></i> Detectar Columnas y Previsualizar
+                    </button>
+                </div>
+
+                <!-- TAB 2: UPLOAD FILE -->
+                <div id="wizard-tab-file" class="wizard-tab-panel" style="display:none;">
+                    <div class="wizard-instructions">
+                        <p><i class="fas fa-info-circle"></i> Sube un archivo <strong>.csv</strong> (Excel exportado como CSV) o un <strong>.json</strong> de catálogo anterior.</p>
+                    </div>
+                    <div class="wizard-file-drop-zone" id="wizard-file-drop-zone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Arrastra tu archivo aquí o haz clic para seleccionarlo</p>
+                        <p class="wizard-hint">Formatos aceptados: .csv, .json</p>
+                        <input type="file" id="wizard-file-input" accept=".csv,.json" style="display:none;">
+                        <button type="button" class="wizard-action-btn" id="wizard-browse-btn">
+                            <i class="fas fa-folder-open"></i> Seleccionar Archivo
+                        </button>
+                    </div>
+                    <p class="wizard-template-link">
+                        <i class="fas fa-file-download"></i>
+                        <a href="plantilla-obras.csv" download="plantilla-obras.csv">Descargar Plantilla CSV de Ejemplo</a>
+                        — Ábrela en Excel, llénala y súbela aquí.
+                    </p>
+                </div>
+
+                <!-- PREVIEW AREA (shared between both tabs) -->
+                <div id="wizard-preview-area" class="wizard-preview-area" style="display:none;">
+                    <div class="wizard-mapping-info" id="wizard-mapping-info"></div>
+                    <div class="wizard-preview-header">
+                        <span id="wizard-preview-count" class="wizard-preview-badge"></span>
+                        <span class="wizard-preview-label">Vista previa (primeras 3 filas)</span>
+                    </div>
+                    <div class="wizard-table-wrapper">
+                        <table id="wizard-preview-table" class="wizard-preview-table">
+                            <thead id="wizard-preview-thead"></thead>
+                            <tbody id="wizard-preview-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div id="wizard-warnings" class="wizard-warnings" style="display:none;"></div>
+                    <div class="wizard-import-actions">
+                        <button type="button" id="wizard-confirm-btn" class="wizard-confirm-btn">
+                            <i class="fas fa-check-circle"></i> <span id="wizard-confirm-label">Confirmar e Importar</span>
+                        </button>
+                        <button type="button" id="wizard-clear-btn" class="wizard-clear-btn">
+                            <i class="fas fa-undo"></i> Limpiar y Reintentar
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+        <div id="pin-modal-overlay" class="pin-modal-overlay">
         <div class="pin-modal-box">
             <h2 class="pin-modal-title"><i class="fas fa-lock"></i> Acceso Protegido</h2>
             <p class="pin-modal-text">Por favor, introduce el PIN para continuar.</p>
@@ -301,6 +383,7 @@
     </div>
 
     <script src="js/grid-calculator.js"></script>
+    <script src="js/catalog-importer.js"></script>
     <script src="script.js"></script>
 </body>
 
