@@ -472,26 +472,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Update logo from position inputs
+    // Update logo from position inputs with boundary clamping
     logoPosXInput.addEventListener('input', () => {
         if (!stagedNeutralLogo) return;
-        stagedNeutralLogo.x_px = parseFloat(logoPosXInput.value) || 0;
+        const previewRect = livePreview.getBoundingClientRect();
+        const maxW = previewRect.width || parseFloat(livePreview.style.width) || (state.labelWidthCm * 37.79) || 300;
+        const rawX = parseFloat(logoPosXInput.value) || 0;
+        const maxX = Math.max(0, maxW - (stagedNeutralLogo.w_px || 0));
+        const clampedX = Math.max(0, Math.min(rawX, maxX));
+        stagedNeutralLogo.x_px = clampedX;
         renderLivePreview();
     });
     logoPosYInput.addEventListener('input', () => {
         if (!stagedNeutralLogo) return;
-        stagedNeutralLogo.y_px = parseFloat(logoPosYInput.value) || 0;
+        const previewRect = livePreview.getBoundingClientRect();
+        const maxH = previewRect.height || parseFloat(livePreview.style.height) || (state.labelHeightCm * 37.79) || 200;
+        const rawY = parseFloat(logoPosYInput.value) || 0;
+        const maxY = Math.max(0, maxH - (stagedNeutralLogo.h_px || 0));
+        const clampedY = Math.max(0, Math.min(rawY, maxY));
+        stagedNeutralLogo.y_px = clampedY;
         renderLivePreview();
     });
     
-    // Width input — proportional scaling
+    // Width input — proportional scaling with bounding box clamping
     const logoSizeWInput = document.getElementById('logo-size-w');
     logoSizeWInput.addEventListener('input', () => {
         if (!stagedNeutralLogo) return;
-        const newW = parseFloat(logoSizeWInput.value) || 5;
-        const aspectRatio = stagedNeutralLogo.h_px / stagedNeutralLogo.w_px;
-        stagedNeutralLogo.w_px = newW;
-        stagedNeutralLogo.h_px = newW * aspectRatio;
+        const previewRect = livePreview.getBoundingClientRect();
+        const maxW = previewRect.width || parseFloat(livePreview.style.width) || (state.labelWidthCm * 37.79) || 300;
+        const maxH = previewRect.height || parseFloat(livePreview.style.height) || (state.labelHeightCm * 37.79) || 200;
+        const aspectRatio = stagedNeutralLogo.h_px / (stagedNeutralLogo.w_px || 1);
+        let requestedW = parseFloat(logoSizeWInput.value) || 5;
+        requestedW = Math.max(5, Math.min(requestedW, maxW));
+        let calculatedH = requestedW * aspectRatio;
+        if (calculatedH > maxH) {
+            calculatedH = maxH;
+            requestedW = calculatedH / aspectRatio;
+        }
+        // Adjust position if width/height now exceeds label boundaries
+        if (stagedNeutralLogo.x_px + requestedW > maxW) {
+            stagedNeutralLogo.x_px = Math.max(0, maxW - requestedW);
+        }
+        if (stagedNeutralLogo.y_px + calculatedH > maxH) {
+            stagedNeutralLogo.y_px = Math.max(0, maxH - calculatedH);
+        }
+        stagedNeutralLogo.w_px = requestedW;
+        stagedNeutralLogo.h_px = calculatedH;
         renderLivePreview();
     });
 
@@ -570,14 +596,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isDragging) {
                 const previewRect = livePreview.getBoundingClientRect();
+                const maxW = previewRect.width;
+                const maxH = previewRect.height;
                 let newX = startLeft + (clientX - startX);
                 let newY = startTop + (clientY - startY);
+                
+                // Pre-snap bounding box clamping
+                const maxX = Math.max(0, maxW - startW);
+                const maxY = Math.max(0, maxH - startH);
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
                 
                 // SNAPPING LOGIC
                 const midX = newX + startW / 2;
                 const midY = newY + startH / 2;
-                const previewMidX = previewRect.width / 2;
-                const previewMidY = previewRect.height / 2;
+                const previewMidX = maxW / 2;
+                const previewMidY = maxH / 2;
 
                 let snappedV = false, snappedH = false;
 
@@ -590,6 +624,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (Math.abs(midY - previewMidY) < SNAP_THRESHOLD) {
                     newY = previewMidY - startH / 2;
                     snappedH = true;
+                }
+
+                // Post-snap bounding box clamping to guarantee zero overflow
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
+
+                // Visual boundary edge indicator
+                const atEdge = (newX <= 0 || newX >= maxX || newY <= 0 || newY >= maxY);
+                if (atEdge) {
+                    wrapper.classList.add('edge-clamped');
+                } else {
+                    wrapper.classList.remove('edge-clamped');
                 }
 
                 // Show Guides
@@ -610,14 +656,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 logoPosXInput.value = Math.round(newX);
                 logoPosYInput.value = Math.round(newY);
             } else if (isResizing) {
+                const previewRect = livePreview.getBoundingClientRect();
+                const maxW = previewRect.width;
+                const maxH = previewRect.height;
+                const aspectRatio = startH / (startW || 1);
+
                 let dx = clientX - startX;
                 let dy = clientY - startY;
                 // Use the largest movement vector to determine scale
                 let moveAmount = Math.abs(dx) > Math.abs(dy) ? dx : dy;
                 let scale = Math.max(0.1, (startW + moveAmount) / startW);
                 
-                let newW = startW * scale;
-                let newH = startH * scale;
+                let newW = Math.max(5, startW * scale);
+                let newH = newW * aspectRatio;
+
+                // Clamping de redimensionamiento (Resize): cannot exceed total label dimensions
+                if (newW > maxW) {
+                    newW = maxW;
+                    newH = newW * aspectRatio;
+                }
+                if (newH > maxH) {
+                    newH = maxH;
+                    newW = newH / aspectRatio;
+                }
+
+                // If newX + newW > previewRect.width, readjust newX or clamp newW to stay strictly inside printable area
+                let currentX = stagedNeutralLogo.x_px;
+                let currentY = stagedNeutralLogo.y_px;
+                if (currentX + newW > maxW) {
+                    currentX = Math.max(0, maxW - newW);
+                    stagedNeutralLogo.x_px = currentX;
+                    wrapper.style.left = `${currentX}px`;
+                    logoPosXInput.value = Math.round(currentX);
+                }
+                if (currentY + newH > maxH) {
+                    currentY = Math.max(0, maxH - newH);
+                    stagedNeutralLogo.y_px = currentY;
+                    wrapper.style.top = `${currentY}px`;
+                    logoPosYInput.value = Math.round(currentY);
+                }
+
+                const atEdge = (newW >= maxW || newH >= maxH || currentX <= 0 || currentY <= 0 || currentX + newW >= maxW || currentY + newH >= maxH);
+                if (atEdge) {
+                    wrapper.classList.add('edge-clamped');
+                } else {
+                    wrapper.classList.remove('edge-clamped');
+                }
 
                 stagedNeutralLogo.w_px = newW;
                 stagedNeutralLogo.h_px = newH;
@@ -647,6 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const handleUp = () => {
             if (isDragging) wrapper.classList.remove('dragging');
+            wrapper.classList.remove('edge-clamped');
             if (vGuide) vGuide.style.display = 'none';
             if (hGuide) hGuide.style.display = 'none';
             isDragging = false; isResizing = false; isRotating = false;
