@@ -127,3 +127,18 @@ Este archivo gestiona las tareas atómicas a ejecutar mediante subagentes en ram
   - Persistencia en `localStorage` mediante `state.styleConfig.fontFamily` y `state.styleConfig.fontSize`.
   - Verificación estática con `node test-syntax.js` con código 0.
 - **Estado**: Completada (Merged a main)
+
+---
+
+### [TASK-011] Motor Unificado de Decoraciones / Imágenes Libres con Límites de Impresión
+- **ID**: `TASK-011`
+- **Objetivo**: Unificar el sistema de decoraciones en un motor de "Imagen / Ornamento Libre" que permita subir cualquier imagen (logo, arabesco o adorno) con manipulación completa en tiempo real (mover, redimensionar, rotar, z-index), restringiendo los límites de movimiento (`clamping`) para que no desborde el área segura de corte del rótulo.
+- **Archivos que toca**: `index.html`, `style.css`, `script.js`
+- **Criterios de Aceptación**:
+  - Unificación o modernización de la UI de subida: opción directa para cargar cualquier imagen ornamental / logo.
+  - El arrastre (`drag`) y cambio de tamaño (`resize`) restringen las coordenadas para que la imagen permanezca dentro de los límites del rótulo (`0 <= x <= previewWidth - width`, `0 <= y <= previewHeight - height`).
+  - Rotación libre continua por handle o input numérico, respetando el contenedor.
+  - Sincronización en vivo 1:1 entre `#live-preview` y `generatePDF()` en `jsPDF`.
+  - Compatibilidad total con proyectos existentes.
+  - Verificación estática con `node test-syntax.js` con código 0.
+- **Estado**: Completada (Merged a main)

@@ -47,13 +47,12 @@
    - Sincronización visual milimétrica entre la previsualización HTML y las coordenadas calculadas para el PDF.
    - Dimensiones personalizables en cm (Ancho `W` y Alto `H`).
    - T-Marks (guías de corte profesionales) dinámicas.
-4. **Motor de Decoración**:
-   - Tipo Arabescos (superior e inferior).
-   - Tipo Logotipo Institucional libre:
-     - Drag & Resize en tiempo real con handles interactivos.
-     - Rotación en grados e inputs numéricos finos.
-     - Control de capas (Send to Back / Bring to Front).
-     - Magnetic snapping a ejes centrales.
+4. **Motor de Decoraciones e Imágenes Libres con Límites Físicos (Clamping)**:
+   - Capacidad universal para subir cualquier imagen ornamental (logo institucional, arabesco, sello o filete en PNG, JPG, WebP o SVG).
+   - Restricción perimetral física (`bounding box clamping`): la imagen no puede salirse de los límites del rótulo ni en arrastre libre, ni en redimensionado por esquina, ni por inputs manuales (`PX`).
+   - Feedback táctil y visual perimetral (`.edge-clamped`) cuando se alcanza el margen del rótulo.
+   - Rotación angular continua precisa y control de capas (Frente / Fondo).
+   - Sincronización milimétrica 1:1 con la salida impresa en PDF (`jsPDF`).
 5. **Generador de PDF Seguro (`jsPDF`) y Módulo de Grilla (`js/grid-calculator.js`)**:
    - Módulo de utilidades matemáticas desacoplado (`calculatePageGrid`, `cmToMm`, `cmToPx`) con soporte UMD.
    - Cálculo automático de grilla por página según dimensiones del rótulo.
