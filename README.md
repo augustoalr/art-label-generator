@@ -1,6 +1,9 @@
 # Art Label Generator V7.0 ("Gallery Style Edition")
 
-Professional tool for generating museum-grade artwork labels with real-time preview, advanced typographical styling, dynamic grid calculations, and PDF export.
+Professional web application for museum curators, galleries, and exhibitors to design and generate museum-grade artwork labels with real-time preview, advanced typographical styling, dynamic grid calculations, and print-ready PDF export.
+
+🌐 **Live Demo**: [https://augustoalr.github.io/art-label-generator-v6/](https://augustoalr.github.io/art-label-generator-v6/)  
+*(PIN de acceso por defecto: 1234)*
 
 ## 🚀 Key Features
 
