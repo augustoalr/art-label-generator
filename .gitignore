@@ -1,0 +1,21 @@
+# Dependencias y entornos
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Datos y colecciones privadas / locales
+data.json
+datos_limpios.json
+*.artlabel
+!ejemplo-catalogo.json
+
+# Logs y volcados temporales
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores (mantener configuración personal fuera de git si aplica)
+.vscode/
+.idea/
