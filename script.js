@@ -1,52 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- INICIO: LÓGICA DEL MODAL DE PIN ---
-
-    // 1. DEFINE TU PIN SECRETO AQUÍ
-    const CORRECT_PIN = "1234"; 
-
-    // 2. Seleccionar los elementos del DOM
-    const pinModalOverlay = document.getElementById('pin-modal-overlay');
-    const pinForm = document.getElementById('pin-form');
-    const pinInput = document.getElementById('pin-input');
-    const pinErrorMessage = document.getElementById('pin-error-message');
-    const mainHeader = document.querySelector('header');
-    const mainAppContainer = document.querySelector('.app-container');
-
-    // 3. Ocultar el contenido principal de la aplicación al inicio
-    mainHeader.classList.add('content-hidden');
-    mainAppContainer.classList.add('content-hidden');
-
-    // 4. Manejar el envío del formulario del PIN
-    pinForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const enteredPin = pinInput.value;
-
-        if (enteredPin === CORRECT_PIN) {
-            pinModalOverlay.style.transition = 'opacity 0.5s ease';
-            pinModalOverlay.style.opacity = '0';
-            
-            setTimeout(() => {
-                pinModalOverlay.style.display = 'none';
-            }, 500);
-
-            mainHeader.classList.remove('content-hidden');
-            mainAppContainer.classList.remove('content-hidden');
-        } else {
-            pinErrorMessage.textContent = 'PIN incorrecto. Inténtalo de nuevo.';
-            pinInput.value = '';
-            pinInput.focus();
-
-            pinModalOverlay.querySelector('.pin-modal-box').animate([
-                { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' },
-                { transform: 'translateX(10px)' }, { transform: 'translateX(-10px)' },
-                { transform: 'translateX(0)' }
-            ], { duration: 300, iterations: 1 });
-        }
-    });
-
-    // --- FIN: LÓGICA DEL MODAL DE PIN ---
-
 
     // --- SELECCIÓN DE ELEMENTOS DEL DOM ---
     const form = document.getElementById('label-form');
